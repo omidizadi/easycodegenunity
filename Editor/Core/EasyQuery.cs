@@ -2,14 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Unity.Plastic.Newtonsoft.Json;
 
 namespace easycodegenunity.Editor.Core
 {
     public static class EasyQuery
     {
-        public static List<EasyQueryResult> WithAttribute<T>()
+        public static EasyQueryCollection WithAttribute<T>()
         {
-            return (from type in AppDomain.CurrentDomain.GetAssemblies()
+            var results = (from type in AppDomain.CurrentDomain.GetAssemblies()
                     from t in type.GetTypes()
                     where Attribute.IsDefined(t, typeof(T))
                     select new EasyQueryResult
@@ -20,19 +21,52 @@ namespace easycodegenunity.Editor.Core
                         Namespace = t.Namespace
                     })
                 .ToList();
+
+            return new EasyQueryCollection(results);
         }
 
-        public static List<EasyQueryResult> WithInheritingFrom<T>()
+        public static EasyQueryCollection WithInheritingFrom<T>()
         {
-            throw new NotImplementedException();
+            var type = typeof(T);
+            var results = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                    from t in assembly.GetTypes()
+                    where type.IsAssignableFrom(t) && t != type
+                    select new EasyQueryResult
+                    {
+                        Name = t.Name,
+                        FullName = t.FullName,
+                        Type = t,
+                        Namespace = t.Namespace
+                    })
+                .ToList();
+
+            return new EasyQueryCollection(results);
         }
 
-        public static List<EasyQueryResult> WithImplementing<T>()
+        public static EasyQueryCollection WithImplementing<T>()
         {
-            throw new NotImplementedException();
+            var interfaceType = typeof(T);
+            if (!interfaceType.IsInterface)
+            {
+                throw new ArgumentException($"{interfaceType.Name} is not an interface");
+            }
+
+            var results = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                    from t in assembly.GetTypes()
+                    where interfaceType.IsAssignableFrom(t) && t != interfaceType
+                    select new EasyQueryResult
+                    {
+                        Name = t.Name,
+                        FullName = t.FullName,
+                        Type = t,
+                        Namespace = t.Namespace
+                    })
+                .ToList();
+
+            return new EasyQueryCollection(results);
         }
 
-        public static List<EasyQueryResult> WithAttribute<T>(this EasyQueryResult resultClass)
+        public static List<EasyQueryResult> WithMembers<T>(this EasyQueryResult resultClass)
         {
             return (from member in resultClass.Type.GetMembers(BindingFlags.Instance | BindingFlags.Public |
                                                                BindingFlags.NonPublic)
@@ -50,64 +84,24 @@ namespace easycodegenunity.Editor.Core
                         _ => null
                     },
                     Namespace = member.DeclaringType?.Namespace,
-                    MemberInfo = member
                 }).ToList();
         }
 
-        public static List<EasyQueryResult> WithMembers(this EasyQueryResult resultClass)
+        public static EasyQueryCollection FromResults(IEnumerable<EasyQueryResult> results)
         {
-            throw new NotImplementedException();
+            return new EasyQueryCollection(results.ToList());
         }
 
-        public static List<EasyQueryResult> FromJson<T>(string path)
+        public static EasyQueryCollection Where(this IEnumerable<EasyQueryResult> results,
+            Func<EasyQueryResult, bool> predicate)
         {
-            throw new NotImplementedException();
+            return new EasyQueryCollection(results.Where(predicate).ToList());
         }
 
-        public static List<EasyQueryResult> FromScriptableObject<T>(string path)
+        public static EasyQueryCollection OrderBy<TKey>(this IEnumerable<EasyQueryResult> results,
+            Func<EasyQueryResult, TKey> keySelector)
         {
-            throw new NotImplementedException();
-        }
-
-        public static List<EasyQueryResult> Where(Func<EasyQueryResult, bool> predicate)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static List<EasyQueryResult> OrderBy<TKey>(Func<EasyQueryResult, TKey> keySelector)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static List<EasyQueryResult> Select(Func<EasyQueryResult, object> selector)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal static string GetFriendlyTypeName(Type type)
-        {
-            if (type == null) return null;
-
-            // Common type mappings
-            if (type == typeof(void)) return "void";
-            if (type == typeof(int)) return "int";
-            if (type == typeof(long)) return "long";
-            if (type == typeof(short)) return "short";
-            if (type == typeof(byte)) return "byte";
-            if (type == typeof(bool)) return "bool";
-            if (type == typeof(string)) return "string";
-            if (type == typeof(double)) return "double";
-            if (type == typeof(float)) return "float";
-            if (type == typeof(decimal)) return "decimal";
-            if (type == typeof(char)) return "char";
-            if (type == typeof(object)) return "object";
-            if (type == typeof(uint)) return "uint";
-            if (type == typeof(ulong)) return "ulong";
-            if (type == typeof(ushort)) return "ushort";
-            if (type == typeof(sbyte)) return "sbyte";
-
-            // For other types, use the standard name
-            return type.Name;
+            return new EasyQueryCollection(results.OrderBy(keySelector).ToList());
         }
     }
 }
