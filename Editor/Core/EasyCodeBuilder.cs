@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using easycodegenunity.Editor.Core.Builders;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,8 +15,7 @@ namespace easycodegenunity.Editor.Core
         private SyntaxNode root;
         private string outputPath;
         public string GeneratedCode { get; private set; }
-
-        private MemberDeclarationSyntax currentMemberContext; // Tracks current method, property, etc.
+        private MemberDeclarationSyntax currentMemberContext;
 
         public EasyCodeBuilder WithTemplate<T>()
         {
@@ -26,11 +26,6 @@ namespace easycodegenunity.Editor.Core
             var tree = CSharpSyntaxTree.ParseText(fullClassCode);
             templateRoot = tree.GetRoot();
             return this;
-        }
-
-        public EasyCodeBuilder AddCode(string code)
-        {
-            throw new System.NotImplementedException();
         }
 
         public EasyCodeBuilder AddUsingStatement(string usingStatement)
@@ -73,94 +68,93 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
-        public EasyCodeBuilder AddType(EasyTypeInfo typeInfo)
+        public EasyCodeBuilder AddType(Func<EasyTypeBuilder, BaseTypeDeclarationSyntax> typeBuilderInstructions)
         {
-            BaseTypeDeclarationSyntax typeDeclaration = typeInfo.Type switch
-            {
-                EasyType.Class => SyntaxFactory.ClassDeclaration(typeInfo.Name),
-                EasyType.Struct => SyntaxFactory.StructDeclaration(typeInfo.Name),
-                EasyType.Interface => SyntaxFactory.InterfaceDeclaration(typeInfo.Name),
-                EasyType.Enum => SyntaxFactory.EnumDeclaration(typeInfo.Name),
-                _ => throw new ArgumentException("Invalid type specified.", nameof(typeInfo.Type))
-            };
-
-            if (!string.IsNullOrWhiteSpace(typeInfo.BaseType))
-            {
-                var baseType = SyntaxFactory.ParseTypeName(typeInfo.BaseType);
-                typeDeclaration = typeDeclaration.WithBaseList(
-                    SyntaxFactory.BaseList(SyntaxFactory.SingletonSeparatedList<BaseTypeSyntax>(
-                        SyntaxFactory.SimpleBaseType(baseType))));
-            }
-
-            if (typeInfo.Interfaces is { Length: > 0 })
-            {
-                var interfaceList = typeInfo.Interfaces.Select(i => SyntaxFactory.SimpleBaseType(
-                    SyntaxFactory.ParseTypeName(i))).ToArray();
-                typeDeclaration = typeDeclaration.WithBaseList(
-                    SyntaxFactory.BaseList(SyntaxFactory.SeparatedList<BaseTypeSyntax>(interfaceList)));
-            }
-
-            typeDeclaration = typeInfo.Modifiers.Aggregate(typeDeclaration,
-                (current, modifier) => current.AddModifiers(SyntaxFactory.Token(modifier)));
-
+            var typeBuilder = new EasyTypeBuilder();
+            var typeDeclaration = typeBuilderInstructions(typeBuilder);
             root = AddMemberToType(root, typeDeclaration);
-
             return this;
         }
 
-        public EasyCodeBuilder AddField(EasyFieldInfo field)
+        public EasyCodeBuilder AddField(Func<EasyFieldBuilder, BaseFieldDeclarationSyntax> fieldBuilderInstructions)
         {
-            var fieldDeclaration = SyntaxFactory.FieldDeclaration(
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName(field.Type))
-                    .WithVariables(SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier(field.Name)))));
-
-            fieldDeclaration = field.Modifiers.Aggregate(fieldDeclaration,
-                (current, modifier) => current.AddModifiers(SyntaxFactory.Token(modifier)));
-
-            SetContext(fieldDeclaration);
-
+            var fieldBuilder = new EasyFieldBuilder();
+            var fieldDeclaration = fieldBuilderInstructions(fieldBuilder);
             root = AddMemberToType(root, fieldDeclaration);
-
             return this;
         }
 
         public EasyCodeBuilder AddProperty(EasyPropertyInfo property)
         {
-            throw new System.NotImplementedException();
-        }
+            var propertyDeclaration = SyntaxFactory.PropertyDeclaration(
+                    SyntaxFactory.ParseTypeName(property.Type), property.Name)
+                .WithModifiers(SyntaxFactory.TokenList(property.Modifiers.Select(SyntaxFactory.Token)));
 
-        public EasyCodeBuilder AddMethod(EasyMethodInfo method)
-        {
-            var methodDeclaration = SyntaxFactory.MethodDeclaration(
-                SyntaxFactory.ParseTypeName(method.ReturnType), method.Name);
-
-
-            methodDeclaration = method.Modifiers.Aggregate(methodDeclaration,
-                (current, modifier) => current.AddModifiers(SyntaxFactory.Token(modifier)));
-
-
-            if (method.Parameters != null && method.Parameters.Length > 0)
+            if (property.Getter != null)
             {
-                var parameterList = SyntaxFactory.ParameterList(
-                    SyntaxFactory.SeparatedList(method.Parameters.Select(p =>
-                        SyntaxFactory.Parameter(SyntaxFactory.Identifier(p.Item2))
-                            .WithType(SyntaxFactory.ParseTypeName(p.Item1)))));
-                methodDeclaration = methodDeclaration.WithParameterList(parameterList);
+                var getMethod = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                    .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(property.Getter)));
+                propertyDeclaration = propertyDeclaration.AddAccessorListAccessors(getMethod);
             }
 
-            if (!string.IsNullOrWhiteSpace(method.Body))
+            if (property.Setter != null)
             {
-                var body = SyntaxFactory.Block(SyntaxFactory.ParseStatement(method.Body));
-                methodDeclaration = methodDeclaration.WithBody(body);
+                var setMethod = SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                    .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(property.Setter)));
+
+                propertyDeclaration = propertyDeclaration.AddAccessorListAccessors(setMethod);
             }
 
-            SetContext(methodDeclaration);
+            SetContext(propertyDeclaration);
 
-            root = AddMemberToType(root, methodDeclaration);
+            root = AddMemberToType(root, propertyDeclaration);
 
             return this;
         }
+
+        public EasyPropertyInfo ExtractPropertyFromTemplate(string propertyName)
+        {
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                throw new ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
+            }
+
+            if (templateRoot == null)
+            {
+                throw new InvalidOperationException("Template root is not set. Please set a template first.");
+            }
+
+            var property = templateRoot.DescendantNodes()
+                .OfType<PropertyDeclarationSyntax>()
+                .FirstOrDefault(p => p.Identifier.Text == propertyName);
+
+            if (property == null)
+            {
+                throw new Exception($"Property '{propertyName}' not found in the template.");
+            }
+
+            var propertyInfo = new EasyPropertyInfo
+            {
+                Name = property.Identifier.Text,
+                Type = property.Type.ToString(),
+                Modifiers = property.Modifiers.Select(m => m.Kind()).ToArray(),
+                Getter = property.AccessorList?.Accessors
+                    .FirstOrDefault(a => a.IsKind(SyntaxKind.GetAccessorDeclaration))?.Body?.ToString(),
+                Setter = property.AccessorList?.Accessors
+                    .FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration))?.Body?.ToString()
+            };
+
+            return propertyInfo;
+        }
+
+        public EasyCodeBuilder AddMethod(Func<EasyMethodBuilder, BaseMethodDeclarationSyntax> methodBuilderInstructions)
+        {
+            var methodBuilder = new EasyMethodBuilder(templateRoot);
+            var methodDeclaration = methodBuilderInstructions(methodBuilder);
+            root = AddMemberToType(root, methodDeclaration);
+            return this;
+        }
+
 
         public EasyCodeBuilder AddComment(string comment, bool isXmlDoc = false)
         {
@@ -267,45 +261,6 @@ namespace easycodegenunity.Editor.Core
             throw new System.NotImplementedException();
         }
 
-        public EasyCodeBuilder ReplaceInMethodBody(string searchText, string replaceText)
-        {
-            if (currentMemberContext == null)
-                throw new InvalidOperationException("No active member context. Add a method or property first.");
-
-            if (currentMemberContext is MethodDeclarationSyntax methodContext)
-            {
-                if (methodContext.Body == null)
-                    throw new InvalidOperationException("Current method has no body to replace text in.");
-
-                string body = methodContext.Body.ToString();
-                body = body.Replace(searchText, replaceText);
-
-                // Parse the modified text as a block, not a statement
-                var newBodyText = $"{body}";
-                var newBody = SyntaxFactory.ParseStatement(newBodyText) as BlockSyntax;
-
-                if (newBody == null)
-                    throw new InvalidOperationException("Failed to parse the modified method body.");
-
-                var updatedMethod = methodContext.WithBody(newBody);
-
-                // Find the current method in the root to make sure we're replacing the correct node
-                var methodInRoot = root.DescendantNodes()
-                    .OfType<MethodDeclarationSyntax>()
-                    .FirstOrDefault(m => m.Identifier.Text == methodContext.Identifier.Text);
-
-                if (methodInRoot != null)
-                {
-                    root = root.ReplaceNode(methodInRoot, updatedMethod);
-                    currentMemberContext = updatedMethod;
-                }
-
-                return this;
-            }
-
-            throw new InvalidOperationException("Current context is not a method.");
-        }
-
         public EasyCodeBuilder SetDirectory(string path)
         {
             outputPath = path ?? throw new ArgumentNullException(nameof(path), "Output path cannot be null.");
@@ -363,33 +318,6 @@ namespace easycodegenunity.Editor.Core
             System.IO.File.WriteAllText(outputPath, GeneratedCode);
         }
 
-        public string ExtractMethodBodyFromTemplate(string methodName)
-        {
-            // grab the body of the method from the template class T by using roslyn
-            if (methodName == null)
-            {
-                throw new ArgumentNullException(nameof(methodName), "Method body cannot be null.");
-            }
-
-            if (templateRoot == null)
-            {
-                throw new InvalidOperationException("Template root is not set. Please set a template first.");
-            }
-
-            var method = templateRoot.DescendantNodes()
-                .OfType<MethodDeclarationSyntax>()
-                .FirstOrDefault(m => m.Identifier.Text == methodName);
-
-            if (method == null)
-            {
-                throw new Exception("Method body cannot be null.");
-            }
-
-            var body = method.Body?.ToString() ?? string.Empty;
-            body = body.TrimStart('{').TrimEnd('}');
-            body = body.Trim();
-            return body;
-        }
 
         private SyntaxNode FindNamedNode(string name)
         {

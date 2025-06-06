@@ -8,7 +8,6 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
         private const string GameDataFieldIdentifier = "_GAME_DATA_FIELD_";
         private const string OriginalFieldIdentifier = "_ORIGINAL_FIELD_";
 
-
         public void Execute()
         {
             foreach (var queryResult in EasyQuery.WithAttribute<GameData>())
@@ -19,23 +18,43 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
                     .AddUsingStatement("System")
                     .AddUsingStatement("UnityEngine")
                     .AddNamespace(queryResult.Namespace)
-                    .AddType(StructDefinition(queryResult));
+                    .AddType(tb => tb
+                        .WithName(queryResult.Name)
+                        .WithType(EasyType.Struct)
+                        .WithModifiers(SyntaxKind.PublicKeyword, SyntaxKind.PartialKeyword)
+                        .Build());
 
                 var members = queryResult.WithMembers<GameDataField>();
 
                 foreach (var memberQueryResult in members)
                 {
-                    builder.AddField(EventDefinition(memberQueryResult));
+                    builder
+                        .AddField(fb => fb
+                            .WithName($"On{memberQueryResult.Name.ToPascalCase()}Changed")
+                            .WithType($"Action<{memberQueryResult.FriendlyTypeName}>")
+                            .WithModifiers(SyntaxKind.PublicKeyword, SyntaxKind.EventKeyword)
+                            .Build());
                 }
 
                 foreach (var memberQueryResult in members)
                 {
                     builder
-                        .AddMethod(SetMethodDefinition(memberQueryResult, builder))
-                        .ReplaceInMethodBody(GameDataFieldIdentifier, memberQueryResult.Name.ToPascalCase())
-                        .ReplaceInMethodBody(OriginalFieldIdentifier, memberQueryResult.Name)
-                        .AddMethod(GetMethodDefinition(memberQueryResult, builder))
-                        .ReplaceInMethodBody(OriginalFieldIdentifier, memberQueryResult.Name);
+                        .AddMethod(mb => mb
+                            .WithName($"Set{memberQueryResult.Name.ToPascalCase()}")
+                            .WithReturnType("void")
+                            .WithModifiers(SyntaxKind.PublicKeyword)
+                            .WithParameters((memberQueryResult.FriendlyTypeName, "newValue"))
+                            .WithBodyFromTemplate(nameof(GameDataEventTemplate.Set_GAME_DATA_FIELD_))
+                            .ReplaceInBody(GameDataFieldIdentifier, memberQueryResult.Name.ToPascalCase())
+                            .ReplaceInBody(OriginalFieldIdentifier, memberQueryResult.Name)
+                            .Build())
+                        .AddMethod(mb => mb
+                            .WithName($"Get{memberQueryResult.Name.ToPascalCase()}")
+                            .WithReturnType(memberQueryResult.FriendlyTypeName)
+                            .WithModifiers(SyntaxKind.PublicKeyword)
+                            .WithBodyFromTemplate(nameof(GameDataEventTemplate.Get_GAME_DATA_FIELD_))
+                            .ReplaceInBody(OriginalFieldIdentifier, memberQueryResult.Name)
+                            .Build());
                 }
 
                 builder
@@ -44,53 +63,6 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
                     .Generate()
                     .Save();
             }
-        }
-
-        private EasyMethodInfo GetMethodDefinition(EasyQueryResult memberQueryResult, EasyCodeBuilder builder)
-        {
-            return new EasyMethodInfo
-            {
-                Name = $"Get{memberQueryResult.Name.ToPascalCase()}",
-                Modifiers = new[] { SyntaxKind.PublicKeyword },
-                ReturnType = memberQueryResult.FriendlyTypeName,
-                Body = builder.ExtractMethodBodyFromTemplate(nameof(GameDataEventTemplate.Get_GAME_DATA_FIELD_))
-            };
-        }
-
-        private EasyMethodInfo SetMethodDefinition(EasyQueryResult memberQueryResult,
-            EasyCodeBuilder builder)
-        {
-            return new EasyMethodInfo
-            {
-                Name = $"Set{memberQueryResult.Name.ToPascalCase()}",
-                ReturnType = "void",
-                Modifiers = new[] { SyntaxKind.PublicKeyword },
-                Parameters = new[]
-                {
-                    (memberQueryResult.FriendlyTypeName, "newValue")
-                },
-                Body = builder.ExtractMethodBodyFromTemplate(nameof(GameDataEventTemplate.Set_GAME_DATA_FIELD_))
-            };
-        }
-
-        private EasyFieldInfo EventDefinition(EasyQueryResult memberQueryResult)
-        {
-            return new EasyFieldInfo
-            {
-                Name = $"On{memberQueryResult.Name.ToPascalCase()}Changed",
-                Type = "Action<" + memberQueryResult.FriendlyTypeName + ">",
-                Modifiers = new[] { SyntaxKind.PublicKeyword, SyntaxKind.EventKeyword }
-            };
-        }
-
-        private EasyTypeInfo StructDefinition(EasyQueryResult queryResult)
-        {
-            return new EasyTypeInfo
-            {
-                Type = EasyType.Struct,
-                Name = queryResult.Name,
-                Modifiers = new[] { SyntaxKind.PublicKeyword, SyntaxKind.PartialKeyword }
-            };
         }
     }
 }

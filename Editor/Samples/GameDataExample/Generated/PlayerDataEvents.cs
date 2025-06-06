@@ -11,8 +11,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
         public event Action<Vector3> OnPlayerPositionChanged;
         public void SetPlayerHealth(int newValue)
         {
-            playerHealth = newValue;
-            OnPlayerHealthChanged?.Invoke(newValue);
+            playerHealth = newValue; OnPlayerHealthChanged ? . Invoke ( newValue ) ; 
         }
 
         public int GetPlayerHealth()
@@ -22,8 +21,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
 
         public void SetPlayerScore(int newValue)
         {
-            playerScore = newValue;
-            OnPlayerScoreChanged?.Invoke(newValue);
+            playerScore = newValue; OnPlayerScoreChanged ? . Invoke ( newValue ) ; 
         }
 
         public int GetPlayerScore()
@@ -33,8 +31,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
 
         public void SetPlayerName(string newValue)
         {
-            playerName = newValue;
-            OnPlayerNameChanged?.Invoke(newValue);
+            playerName = newValue; OnPlayerNameChanged ? . Invoke ( newValue ) ; 
         }
 
         public string GetPlayerName()
@@ -44,8 +41,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
 
         public void SetPlayerPosition(Vector3 newValue)
         {
-            playerPosition = newValue;
-            OnPlayerPositionChanged?.Invoke(newValue);
+            playerPosition = newValue; OnPlayerPositionChanged ? . Invoke ( newValue ) ; 
         }
 
         public Vector3 GetPlayerPosition()

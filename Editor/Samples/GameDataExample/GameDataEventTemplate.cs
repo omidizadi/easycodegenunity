@@ -8,6 +8,21 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
         private Placeholder _ORIGINAL_FIELD_;
         private event Action<Placeholder> On_GAME_DATA_FIELD_Changed;
 
+        private int randomField;
+
+        public int RandomField
+        {
+            get => randomField;
+            set
+            {
+                if (randomField != value)
+                {
+                    randomField = value;
+                    On_GAME_DATA_FIELD_Changed?.Invoke(_ORIGINAL_FIELD_);
+                }
+            }
+        }
+
         internal void Set_GAME_DATA_FIELD_(Placeholder newValue)
         {
             _ORIGINAL_FIELD_ = newValue;

@@ -10,13 +10,12 @@ namespace com.omidizadi.EasyCodeGen
 {
     public class EasyCodeGenWindow : EditorWindow
     {
-        private Vector2 _scrollPosition;
-        private Dictionary<string, bool> _assemblySelections = new Dictionary<string, bool>();
-        private List<string> _availableAssemblies = new List<string>();
-        private bool _initialized = false;
-        private GUIStyle _headerStyle;
-        private GUIStyle _sectionStyle;
-        private string _assemblySearchTerm = "";
+        private Vector2 scrollPosition;
+        private readonly Dictionary<string, bool> _assemblySelections = new();
+        private readonly List<string> _availableAssemblies = new();
+        private bool initialized;
+        private GUIStyle sectionStyle;
+        private string assemblySearchTerm = "";
 
         [MenuItem("Window/EasyCodeGen")]
         public static void ShowWindow()
@@ -27,29 +26,20 @@ namespace com.omidizadi.EasyCodeGen
 
         private void OnEnable()
         {
-            _initialized = false;
+            initialized = false;
         }
 
         private void Initialize()
         {
-            // Set up styles
-            _headerStyle = new GUIStyle(EditorStyles.boldLabel)
-            {
-                fontSize = 16,
-                margin = new RectOffset(0, 0, 10, 10)
-            };
-
-            _sectionStyle = new GUIStyle(EditorStyles.boldLabel)
+            sectionStyle = new GUIStyle(EditorStyles.boldLabel)
             {
                 fontSize = 13,
                 margin = new RectOffset(0, 0, 8, 4)
             };
 
-            // Get all assemblies in the current domain
             RefreshAssemblyList();
 
-            // Load selected assemblies from settings
-            foreach (string assemblyName in EasyCodeGenSettings.Instance.IncludedAssemblies)
+            foreach (var assemblyName in EasyCodeGenSettings.Instance.IncludedAssemblies)
             {
                 if (_assemblySelections.ContainsKey(assemblyName))
                 {
@@ -57,7 +47,7 @@ namespace com.omidizadi.EasyCodeGen
                 }
             }
 
-            _initialized = true;
+            initialized = true;
         }
 
         private void RefreshAssemblyList()
@@ -65,29 +55,28 @@ namespace com.omidizadi.EasyCodeGen
             _availableAssemblies.Clear();
             _assemblySelections.Clear();
 
-            // Get all loaded assemblies in the domain
             var assemblies = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
                 .OrderBy(a => a.GetName().Name);
 
             foreach (var assembly in assemblies)
             {
-                string assemblyName = assembly.GetName().Name;
+                var assemblyName = assembly.GetName().Name;
                 _availableAssemblies.Add(assemblyName);
-                bool isIncluded = EasyCodeGenSettings.Instance.IsAssemblyIncluded(assemblyName);
+                var isIncluded = EasyCodeGenSettings.Instance.IsAssemblyIncluded(assemblyName);
                 _assemblySelections[assemblyName] = isIncluded;
             }
         }
 
         private void OnGUI()
         {
-            if (!_initialized)
+            if (!initialized)
             {
                 Initialize();
             }
 
             EditorGUILayout.BeginVertical();
-            EditorGUILayout.LabelField("Assembly Selection", _sectionStyle);
+            EditorGUILayout.LabelField("Assembly Selection", sectionStyle);
 
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Include All", GUILayout.Width(100)))
@@ -112,43 +101,37 @@ namespace com.omidizadi.EasyCodeGen
                 "Select the assemblies to scan for code generators (classes implementing IEasyCodeGenerator)",
                 MessageType.Info);
 
-            // Add search field for assemblies
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Search:", GUILayout.Width(50));
-            string newSearchTerm = EditorGUILayout.TextField(_assemblySearchTerm);
-            if (newSearchTerm != _assemblySearchTerm)
+            var newSearchTerm = EditorGUILayout.TextField(assemblySearchTerm);
+            if (newSearchTerm != assemblySearchTerm)
             {
-                _assemblySearchTerm = newSearchTerm;
-                // Reset scroll position when search changes
-                _scrollPosition = Vector2.zero;
+                assemblySearchTerm = newSearchTerm;
+                scrollPosition = Vector2.zero;
             }
 
-            if (GUILayout.Button("X", GUILayout.Width(20)) && !string.IsNullOrEmpty(_assemblySearchTerm))
+            if (GUILayout.Button("X", GUILayout.Width(20)) && !string.IsNullOrEmpty(assemblySearchTerm))
             {
-                _assemblySearchTerm = "";
-                // Reset scroll position when clearing search
-                _scrollPosition = Vector2.zero;
+                assemblySearchTerm = "";
+                scrollPosition = Vector2.zero;
             }
 
             EditorGUILayout.EndHorizontal();
 
-            _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
 
-            // Filter and display assembly selection based on search term
             foreach (var assemblyName in _availableAssemblies)
             {
-                // Skip assemblies that don't match the search term
-                if (!string.IsNullOrEmpty(_assemblySearchTerm) &&
-                    !assemblyName.ToLowerInvariant().Contains(_assemblySearchTerm.ToLowerInvariant()))
+                if (!string.IsNullOrEmpty(assemblySearchTerm) &&
+                    !assemblyName.ToLowerInvariant().Contains(assemblySearchTerm.ToLowerInvariant()))
                 {
                     continue;
                 }
 
-                bool previous = _assemblySelections[assemblyName];
-                bool current = EditorGUILayout.ToggleLeft(
+                var previous = _assemblySelections[assemblyName];
+                var current = EditorGUILayout.ToggleLeft(
                     new GUIContent(assemblyName), previous);
 
-                // If changed
                 if (previous != current)
                 {
                     _assemblySelections[assemblyName] = current;
@@ -196,47 +179,31 @@ namespace com.omidizadi.EasyCodeGen
 
         private void GenerateCode()
         {
-            int generatorCount = 0;
+            var generatorCount = 0;
 
-            // For each selected assembly
             foreach (var assemblyEntry in _assemblySelections.Where(kv => kv.Value))
             {
-                string assemblyName = assemblyEntry.Key;
-                try
+                var assemblyName = assemblyEntry.Key;
+
+                var assembly = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(a => a.GetName().Name == assemblyName);
+
+                if (assembly != null)
                 {
-                    // Find the assembly by name
-                    Assembly assembly = AppDomain.CurrentDomain.GetAssemblies()
-                        .FirstOrDefault(a => a.GetName().Name == assemblyName);
+                    var generators = assembly.GetTypes()
+                        .Where(t => t.GetInterfaces().Contains(typeof(IEasyCodeGenerator)) && !t.IsAbstract)
+                        .ToList();
 
-                    if (assembly != null)
+                    if (generators.Count > 0)
                     {
-                        // Find all types implementing IEasyCodeGenerator
-                        var generators = assembly.GetTypes()
-                            .Where(t => t.GetInterfaces().Contains(typeof(IEasyCodeGenerator)) && !t.IsAbstract)
-                            .ToList();
-
-                        if (generators.Count > 0)
+                        foreach (var generatorType in generators)
                         {
-                            foreach (var generatorType in generators)
-                            {
-                                try
-                                {
-                                    var generator = (IEasyCodeGenerator)Activator.CreateInstance(generatorType);
-                                    generator.Execute();
-                                    generatorCount++;
-                                    Debug.Log($"Executed generator: {generatorType.Name}");
-                                }
-                                catch (Exception ex)
-                                {
-                                    Debug.LogError($"Error executing generator {generatorType.Name}: {ex.Message}");
-                                }
-                            }
+                            var generator = (IEasyCodeGenerator)Activator.CreateInstance(generatorType);
+                            generator.Execute();
+                            generatorCount++;
+                            Debug.Log($"Executed generator: {generatorType.Name}");
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"Error processing assembly {assemblyName}: {ex.Message}");
                 }
             }
 

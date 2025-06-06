@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace easycodegenunity.Editor.Core
 {
     public class EasyQueryCollection : List<EasyQueryResult>
     {
         private readonly List<EasyQueryResult> _results;
+        private IEnumerator<EasyQueryResult> _enumerator;
 
         public EasyQueryCollection(List<EasyQueryResult> results)
         {

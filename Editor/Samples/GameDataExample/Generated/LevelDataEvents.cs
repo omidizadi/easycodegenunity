@@ -12,8 +12,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
         public event Action<float> OnLevelItemDropRateChanged;
         public void SetLevelNumber(int newValue)
         {
-            levelNumber = newValue;
-            OnLevelNumberChanged?.Invoke(newValue);
+            levelNumber = newValue; OnLevelNumberChanged ? . Invoke ( newValue ) ; 
         }
 
         public int GetLevelNumber()
@@ -23,8 +22,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
 
         public void SetLevelName(string newValue)
         {
-            levelName = newValue;
-            OnLevelNameChanged?.Invoke(newValue);
+            levelName = newValue; OnLevelNameChanged ? . Invoke ( newValue ) ; 
         }
 
         public string GetLevelName()
@@ -34,8 +32,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
 
         public void SetLevelExp(float newValue)
         {
-            levelExp = newValue;
-            OnLevelExpChanged?.Invoke(newValue);
+            levelExp = newValue; OnLevelExpChanged ? . Invoke ( newValue ) ; 
         }
 
         public float GetLevelExp()
@@ -45,8 +42,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
 
         public void SetLevelEnemyCount(int newValue)
         {
-            levelEnemyCount = newValue;
-            OnLevelEnemyCountChanged?.Invoke(newValue);
+            levelEnemyCount = newValue; OnLevelEnemyCountChanged ? . Invoke ( newValue ) ; 
         }
 
         public int GetLevelEnemyCount()
@@ -56,8 +52,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
 
         public void SetLevelItemDropRate(float newValue)
         {
-            levelItemDropRate = newValue;
-            OnLevelItemDropRateChanged?.Invoke(newValue);
+            levelItemDropRate = newValue; OnLevelItemDropRateChanged ? . Invoke ( newValue ) ; 
         }
 
         public float GetLevelItemDropRate()
