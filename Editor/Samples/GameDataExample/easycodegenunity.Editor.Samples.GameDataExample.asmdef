@@ -1,0 +1,16 @@
+{
+    "name": "easycodegenunity.Editor.Samples.GameDataExample",
+    "rootNamespace": "",
+    "references": [
+        "GUID:109c9b6833d684de6a319b0f2ce0c931"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

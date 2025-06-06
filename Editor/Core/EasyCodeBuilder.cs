@@ -337,7 +337,7 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
-        internal EasyCodeBuilder Generate()
+        public EasyCodeBuilder Generate()
         {
             // This method would typically generate the final code from the root syntax node
             // and write it to the specified output path.
@@ -358,7 +358,7 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
-        internal void Save()
+        public void Save()
         {
             System.IO.File.WriteAllText(outputPath, GeneratedCode);
         }
