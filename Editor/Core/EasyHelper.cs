@@ -1,10 +1,11 @@
 using System;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace easycodegenunity.Editor.Core
 {
     public static class EasyHelper
     {
-        internal static string GetFriendlyTypeName(Type type)
+        internal static string GetFriendlyTypeName(this Type type)
         {
             if (type == null) return null;
 

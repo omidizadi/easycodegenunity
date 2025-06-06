@@ -13,8 +13,20 @@ namespace easycodegenunity.Editor.Core
         private SyntaxNode templateRoot;
         private SyntaxNode root;
         private string outputPath;
+        public string GeneratedCode { get; private set; }
 
         private MemberDeclarationSyntax currentMemberContext; // Tracks current method, property, etc.
+
+        public EasyCodeBuilder WithTemplate<T>()
+        {
+            var template = typeof(T);
+            var targetTypeGuid = AssetDatabase.FindAssets($"t:Script {template.Name}").FirstOrDefault();
+            var pathToClass = AssetDatabase.GUIDToAssetPath(targetTypeGuid);
+            var fullClassCode = AssetDatabase.LoadAssetAtPath<TextAsset>(pathToClass).text;
+            var tree = CSharpSyntaxTree.ParseText(fullClassCode);
+            templateRoot = tree.GetRoot();
+            return this;
+        }
 
         public EasyCodeBuilder AddCode(string code)
         {
@@ -50,7 +62,7 @@ namespace easycodegenunity.Editor.Core
 
             var namespaceDeclaration = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName(namespaceName));
 
-            CompilationUnitSyntax compilationUnitRoot = root switch
+            var compilationUnitRoot = root switch
             {
                 null => SyntaxFactory.CompilationUnit(),
                 CompilationUnitSyntax cu => cu,
@@ -72,29 +84,6 @@ namespace easycodegenunity.Editor.Core
                 _ => throw new ArgumentException("Invalid type specified.", nameof(typeInfo.Type))
             };
 
-            typeDeclaration = typeInfo.AccessModifier switch
-            {
-                TypeAccessModifier.Public =>
-                    typeDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword)),
-                TypeAccessModifier.Private => typeDeclaration.AddModifiers(
-                    SyntaxFactory.Token(SyntaxKind.PrivateKeyword)),
-                TypeAccessModifier.Protected => typeDeclaration.AddModifiers(
-                    SyntaxFactory.Token(SyntaxKind.ProtectedKeyword)),
-                TypeAccessModifier.Internal => typeDeclaration.AddModifiers(
-                    SyntaxFactory.Token(SyntaxKind.InternalKeyword)),
-                TypeAccessModifier.Abstract => typeDeclaration.AddModifiers(
-                    SyntaxFactory.Token(SyntaxKind.AbstractKeyword)),
-                TypeAccessModifier.Sealed =>
-                    typeDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.SealedKeyword)),
-                _ => throw new ArgumentException("Invalid type access modifier specified.",
-                    nameof(typeInfo.AccessModifier))
-            };
-
-            if (typeInfo.IsStatic)
-            {
-                typeDeclaration = typeDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
-            }
-
             if (!string.IsNullOrWhiteSpace(typeInfo.BaseType))
             {
                 var baseType = SyntaxFactory.ParseTypeName(typeInfo.BaseType);
@@ -103,7 +92,7 @@ namespace easycodegenunity.Editor.Core
                         SyntaxFactory.SimpleBaseType(baseType))));
             }
 
-            if (typeInfo.Interfaces != null && typeInfo.Interfaces.Length > 0)
+            if (typeInfo.Interfaces is { Length: > 0 })
             {
                 var interfaceList = typeInfo.Interfaces.Select(i => SyntaxFactory.SimpleBaseType(
                     SyntaxFactory.ParseTypeName(i))).ToArray();
@@ -111,40 +100,29 @@ namespace easycodegenunity.Editor.Core
                     SyntaxFactory.BaseList(SyntaxFactory.SeparatedList<BaseTypeSyntax>(interfaceList)));
             }
 
-            if (typeInfo.IsPartial)
-            {
-                typeDeclaration = typeDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword));
-            }
+            typeDeclaration = typeInfo.Modifiers.Aggregate(typeDeclaration,
+                (current, modifier) => current.AddModifiers(SyntaxFactory.Token(modifier)));
 
-            CompilationUnitSyntax compilationUnitRoot = root switch
-            {
-                null => SyntaxFactory.CompilationUnit(),
-                CompilationUnitSyntax cu => cu,
-                _ => throw new InvalidOperationException("Root node must be a CompilationUnitSyntax to add types.")
-            };
-
-            // Look for a namespace declaration to add the type to
-            var namespaceDeclaration =
-                compilationUnitRoot.Members.OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
-
-            if (namespaceDeclaration != null)
-            {
-                // Add the type to the namespace
-                var newNamespace = namespaceDeclaration.AddMembers(typeDeclaration);
-                root = compilationUnitRoot.ReplaceNode(namespaceDeclaration, newNamespace);
-            }
-            else
-            {
-                // No namespace found, add type directly to compilation unit
-                root = compilationUnitRoot.AddMembers(typeDeclaration);
-            }
+            root = AddMemberToType(root, typeDeclaration);
 
             return this;
         }
 
         public EasyCodeBuilder AddField(EasyFieldInfo field)
         {
-            throw new System.NotImplementedException();
+            var fieldDeclaration = SyntaxFactory.FieldDeclaration(
+                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName(field.Type))
+                    .WithVariables(SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier(field.Name)))));
+
+            fieldDeclaration = field.Modifiers.Aggregate(fieldDeclaration,
+                (current, modifier) => current.AddModifiers(SyntaxFactory.Token(modifier)));
+
+            SetContext(fieldDeclaration);
+
+            root = AddMemberToType(root, fieldDeclaration);
+
+            return this;
         }
 
         public EasyCodeBuilder AddProperty(EasyPropertyInfo property)
@@ -157,40 +135,10 @@ namespace easycodegenunity.Editor.Core
             var methodDeclaration = SyntaxFactory.MethodDeclaration(
                 SyntaxFactory.ParseTypeName(method.ReturnType), method.Name);
 
-            // Access modifiers
-            SyntaxKind accessModifier = method.AccessModifier switch
-            {
-                MemberAccessModifier.Public => SyntaxKind.PublicKeyword,
-                MemberAccessModifier.Private => SyntaxKind.PrivateKeyword,
-                MemberAccessModifier.Protected => SyntaxKind.ProtectedKeyword,
-                MemberAccessModifier.Internal => SyntaxKind.InternalKeyword,
-                _ => SyntaxKind.PublicKeyword
-            };
 
-            methodDeclaration = methodDeclaration.AddModifiers(SyntaxFactory.Token(accessModifier));
+            methodDeclaration = method.Modifiers.Aggregate(methodDeclaration,
+                (current, modifier) => current.AddModifiers(SyntaxFactory.Token(modifier)));
 
-            if (method.IsStatic)
-            {
-                methodDeclaration = methodDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
-            }
-
-            // Add other modifiers
-            if (method.Modifiers != null)
-            {
-                foreach (var modifier in method.Modifiers)
-                {
-                    SyntaxKind kind = modifier switch
-                    {
-                        "async" => SyntaxKind.AsyncKeyword,
-                        "virtual" => SyntaxKind.VirtualKeyword,
-                        "abstract" => SyntaxKind.AbstractKeyword,
-                        "override" => SyntaxKind.OverrideKeyword,
-                        "sealed" => SyntaxKind.SealedKeyword,
-                        _ => throw new ArgumentException($"Unsupported modifier: {modifier}")
-                    };
-                    methodDeclaration = methodDeclaration.AddModifiers(SyntaxFactory.Token(kind));
-                }
-            }
 
             if (method.Parameters != null && method.Parameters.Length > 0)
             {
@@ -209,7 +157,6 @@ namespace easycodegenunity.Editor.Core
 
             SetContext(methodDeclaration);
 
-            // Add the method to the appropriate location in the syntax tree
             root = AddMemberToType(root, methodDeclaration);
 
             return this;
@@ -260,11 +207,11 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
-        public string ExtractComment(string name)
+        public string ExtractCommentFromTemplate(string memberName)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(memberName))
             {
-                throw new ArgumentNullException(nameof(name), "Name cannot be null or empty.");
+                throw new ArgumentNullException(nameof(memberName), "Name cannot be null or empty.");
             }
 
             if (templateRoot == null)
@@ -272,7 +219,7 @@ namespace easycodegenunity.Editor.Core
                 throw new InvalidOperationException("Template root is not set. Please set a template first.");
             }
 
-            SyntaxNode namedNode = FindNamedNode(name);
+            SyntaxNode namedNode = FindNamedNode(memberName);
 
             if (namedNode == null)
             {
@@ -310,97 +257,9 @@ namespace easycodegenunity.Editor.Core
             return hasComment ? commentBuilder.ToString().TrimEnd() : string.Empty;
         }
 
-        private SyntaxNode FindNamedNode(string name)
-        {
-            var typeDeclaration = templateRoot.DescendantNodes().OfType<BaseTypeDeclarationSyntax>()
-                .FirstOrDefault(t => t.Identifier.Text == name);
-            if (typeDeclaration != null)
-                return typeDeclaration;
-
-            var methodDeclaration = templateRoot.DescendantNodes().OfType<MethodDeclarationSyntax>()
-                .FirstOrDefault(m => m.Identifier.Text == name);
-            if (methodDeclaration != null)
-                return methodDeclaration;
-
-            var propertyDeclaration = templateRoot.DescendantNodes().OfType<PropertyDeclarationSyntax>()
-                .FirstOrDefault(p => p.Identifier.Text == name);
-            if (propertyDeclaration != null)
-                return propertyDeclaration;
-
-            var fieldDeclaration = templateRoot.DescendantNodes().OfType<FieldDeclarationSyntax>()
-                .FirstOrDefault(f => f.Declaration.Variables.Any(v => v.Identifier.Text == name));
-            if (fieldDeclaration != null)
-                return fieldDeclaration;
-
-            var enumMemberDeclaration = templateRoot.DescendantNodes().OfType<EnumMemberDeclarationSyntax>()
-                .FirstOrDefault(e => e.Identifier.Text == name);
-            if (enumMemberDeclaration != null)
-                return enumMemberDeclaration;
-
-            return null; // No matching node found
-        }
-
         public EasyCodeBuilder AddAttribute<T>(params string[] parameters)
         {
             throw new System.NotImplementedException();
-        }
-
-        public EasyCodeBuilder AddEvent(EasyEventInfo eventInfo)
-        {
-            string typeName;
-            if (eventInfo.Type == EasyEventInfo.EventType.Action)
-            {
-                typeName = "Action";
-                if (eventInfo.ParameterTypes is { Length: > 0 })
-                {
-                    typeName += "<" + string.Join(", ", eventInfo.ParameterTypes.Select(p => p)) + ">";
-                }
-            }
-            else if (eventInfo.Type == EasyEventInfo.EventType.Func)
-            {
-                if (eventInfo.ParameterTypes == null || eventInfo.ParameterTypes.Length < 1)
-                {
-                    throw new ArgumentException(
-                        "Func event types must have at least one parameter type for the return value.",
-                        nameof(eventInfo.ParameterTypes));
-                }
-
-                // Last type in the array is the return type for Func
-                typeName = "Func<" + string.Join(", ", eventInfo.ParameterTypes.Select(p => p)) + ">";
-            }
-            else
-            {
-                throw new ArgumentException("Invalid event type specified.", nameof(eventInfo.Type));
-            }
-
-            var eventDeclaration = SyntaxFactory.EventFieldDeclaration(
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName(typeName))
-                    .WithVariables(SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier(eventInfo.Name)))));
-
-            // Access modifiers
-            SyntaxKind accessModifier = eventInfo.AccessModifier switch
-            {
-                MemberAccessModifier.Public => SyntaxKind.PublicKeyword,
-                MemberAccessModifier.Private => SyntaxKind.PrivateKeyword,
-                MemberAccessModifier.Protected => SyntaxKind.ProtectedKeyword,
-                MemberAccessModifier.Internal => SyntaxKind.InternalKeyword,
-                _ => SyntaxKind.PublicKeyword
-            };
-
-            eventDeclaration = eventDeclaration.AddModifiers(SyntaxFactory.Token(accessModifier));
-
-            if (eventInfo.IsStatic)
-            {
-                eventDeclaration = eventDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
-            }
-
-            SetContext(eventDeclaration);
-
-            // Add the event to the appropriate location in the syntax tree
-            root = AddMemberToType(root, eventDeclaration);
-
-            return this;
         }
 
         public EasyCodeBuilder AddConstructor(string[] parameters = null, string constructorBody = null)
@@ -478,7 +337,7 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
-        internal void GenerateCode()
+        internal EasyCodeBuilder Generate()
         {
             // This method would typically generate the final code from the root syntax node
             // and write it to the specified output path.
@@ -495,20 +354,13 @@ namespace easycodegenunity.Editor.Core
                     "Output path is not set. Please specify an output path before generating code.");
             }
 
-            var formattedCode = root.NormalizeWhitespace().ToFullString();
-            System.IO.File.WriteAllText(outputPath, formattedCode);
-            Debug.Log($"Code generated successfully at {outputPath}");
+            GeneratedCode = root.NormalizeWhitespace().ToFullString();
+            return this;
         }
 
-        public EasyCodeBuilder WithTemplate<T>()
+        internal void Save()
         {
-            var template = typeof(T);
-            var targetTypeGuid = AssetDatabase.FindAssets($"t:Script {template.Name}").FirstOrDefault();
-            var pathToClass = AssetDatabase.GUIDToAssetPath(targetTypeGuid);
-            var fullClassCode = AssetDatabase.LoadAssetAtPath<TextAsset>(pathToClass).text;
-            var tree = CSharpSyntaxTree.ParseText(fullClassCode);
-            templateRoot = tree.GetRoot();
-            return this;
+            System.IO.File.WriteAllText(outputPath, GeneratedCode);
         }
 
         public string ExtractMethodBodyFromTemplate(string methodName)
@@ -537,6 +389,36 @@ namespace easycodegenunity.Editor.Core
             body = body.TrimStart('{').TrimEnd('}');
             body = body.Trim();
             return body;
+        }
+
+        private SyntaxNode FindNamedNode(string name)
+        {
+            var typeDeclaration = templateRoot.DescendantNodes().OfType<BaseTypeDeclarationSyntax>()
+                .FirstOrDefault(t => t.Identifier.Text == name);
+            if (typeDeclaration != null)
+                return typeDeclaration;
+
+            var methodDeclaration = templateRoot.DescendantNodes().OfType<MethodDeclarationSyntax>()
+                .FirstOrDefault(m => m.Identifier.Text == name);
+            if (methodDeclaration != null)
+                return methodDeclaration;
+
+            var propertyDeclaration = templateRoot.DescendantNodes().OfType<PropertyDeclarationSyntax>()
+                .FirstOrDefault(p => p.Identifier.Text == name);
+            if (propertyDeclaration != null)
+                return propertyDeclaration;
+
+            var fieldDeclaration = templateRoot.DescendantNodes().OfType<FieldDeclarationSyntax>()
+                .FirstOrDefault(f => f.Declaration.Variables.Any(v => v.Identifier.Text == name));
+            if (fieldDeclaration != null)
+                return fieldDeclaration;
+
+            var enumMemberDeclaration = templateRoot.DescendantNodes().OfType<EnumMemberDeclarationSyntax>()
+                .FirstOrDefault(e => e.Identifier.Text == name);
+            if (enumMemberDeclaration != null)
+                return enumMemberDeclaration;
+
+            return null; // No matching node found
         }
 
         private void SetContext(MemberDeclarationSyntax memberSyntax)
@@ -580,63 +462,5 @@ namespace easycodegenunity.Editor.Core
 
             throw new InvalidOperationException("No namespace or type found to add the member to.");
         }
-    }
-
-    public struct EasyMethodInfo
-    {
-        public string Name { get; set; }
-        public string ReturnType { get; set; }
-        public MemberAccessModifier AccessModifier { get; set; }
-        public bool IsStatic { get; set; }
-        public string[] Modifiers { get; set; }
-        public (string, string)[] Parameters { get; set; }
-        public string Body { get; set; }
-    }
-
-    public struct EasyFieldInfo
-    {
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public MemberAccessModifier AccessModifier { get; set; }
-        public bool IsStatic { get; set; }
-        public string InitialValue { get; set; }
-    }
-
-    public struct EasyPropertyInfo
-    {
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public MemberAccessModifier AccessModifier { get; set; }
-        public bool IsStatic { get; set; }
-        public string InitialValue { get; set; }
-        public string Getter { get; set; }
-        public string Setter { get; set; }
-    }
-
-    public struct EasyEventInfo
-    {
-        public string Name { get; set; }
-        public EventType Type { get; set; }
-        public string[] ParameterTypes { get; set; }
-        public MemberAccessModifier AccessModifier { get; set; }
-        public bool IsStatic { get; set; }
-
-        //todo: allow creating custom delegate types
-        public enum EventType
-        {
-            Action,
-            Func
-        }
-    }
-
-    public struct EasyTypeInfo
-    {
-        public EasyType Type { get; set; }
-        public string Name { get; set; }
-        public bool IsPartial { get; set; }
-        public string BaseType { get; set; }
-        public string[] Interfaces { get; set; }
-        public TypeAccessModifier AccessModifier { get; set; }
-        public bool IsStatic { get; set; }
     }
 }

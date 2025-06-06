@@ -1,4 +1,5 @@
 using easycodegenunity.Editor.Core;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace easycodegenunity.Editor.Samples.GameDataExample
 {
@@ -24,7 +25,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
 
                 foreach (var memberQueryResult in members)
                 {
-                    builder.AddEvent(EventDefinition(memberQueryResult));
+                    builder.AddField(EventDefinition(memberQueryResult));
                 }
 
                 foreach (var memberQueryResult in members)
@@ -40,7 +41,8 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
                 builder
                     .SetDirectory("Assets/easycodegenunity/Editor/Samples/GameDataExample/Generated")
                     .SetFileName(queryResult.Name + "Events.cs")
-                    .GenerateCode();
+                    .Generate()
+                    .Save();
             }
         }
 
@@ -49,8 +51,8 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
             return new EasyMethodInfo
             {
                 Name = $"Get{memberQueryResult.Name.ToPascalCase()}",
+                Modifiers = new[] { SyntaxKind.PublicKeyword },
                 ReturnType = memberQueryResult.FriendlyTypeName,
-                AccessModifier = MemberAccessModifier.Public,
                 Body = builder.ExtractMethodBodyFromTemplate(nameof(GameDataEventTemplate.Get_GAME_DATA_FIELD_))
             };
         }
@@ -62,7 +64,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
             {
                 Name = $"Set{memberQueryResult.Name.ToPascalCase()}",
                 ReturnType = "void",
-                AccessModifier = MemberAccessModifier.Public,
+                Modifiers = new[] { SyntaxKind.PublicKeyword },
                 Parameters = new[]
                 {
                     (memberQueryResult.FriendlyTypeName, "newValue")
@@ -71,14 +73,13 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
             };
         }
 
-        private EasyEventInfo EventDefinition(EasyQueryResult memberQueryResult)
+        private EasyFieldInfo EventDefinition(EasyQueryResult memberQueryResult)
         {
-            return new EasyEventInfo
+            return new EasyFieldInfo
             {
                 Name = $"On{memberQueryResult.Name.ToPascalCase()}Changed",
-                Type = EasyEventInfo.EventType.Action,
-                ParameterTypes = new[] { memberQueryResult.FriendlyTypeName },
-                AccessModifier = MemberAccessModifier.Public
+                Type = "Action<" + memberQueryResult.FriendlyTypeName + ">",
+                Modifiers = new[] { SyntaxKind.PublicKeyword, SyntaxKind.EventKeyword }
             };
         }
 
@@ -88,8 +89,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
             {
                 Type = EasyType.Struct,
                 Name = queryResult.Name,
-                IsPartial = true,
-                AccessModifier = TypeAccessModifier.Public
+                Modifiers = new[] { SyntaxKind.PublicKeyword, SyntaxKind.PartialKeyword }
             };
         }
     }
