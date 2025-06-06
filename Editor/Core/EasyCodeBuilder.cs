@@ -84,68 +84,68 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
-        public EasyCodeBuilder AddProperty(EasyPropertyInfo property)
-        {
-            var propertyDeclaration = SyntaxFactory.PropertyDeclaration(
-                    SyntaxFactory.ParseTypeName(property.Type), property.Name)
-                .WithModifiers(SyntaxFactory.TokenList(property.Modifiers.Select(SyntaxFactory.Token)));
+        // public EasyCodeBuilder AddProperty(EasyPropertyInfo property)
+        // {
+        //     var propertyDeclaration = SyntaxFactory.PropertyDeclaration(
+        //             SyntaxFactory.ParseTypeName(property.Type), property.Name)
+        //         .WithModifiers(SyntaxFactory.TokenList(property.Modifiers.Select(SyntaxFactory.Token)));
+        //
+        //     if (property.Getter != null)
+        //     {
+        //         var getMethod = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+        //             .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(property.Getter)));
+        //         propertyDeclaration = propertyDeclaration.AddAccessorListAccessors(getMethod);
+        //     }
+        //
+        //     if (property.Setter != null)
+        //     {
+        //         var setMethod = SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+        //             .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(property.Setter)));
+        //
+        //         propertyDeclaration = propertyDeclaration.AddAccessorListAccessors(setMethod);
+        //     }
+        //
+        //     SetContext(propertyDeclaration);
+        //
+        //     root = AddMemberToType(root, propertyDeclaration);
+        //
+        //     return this;
+        // }
 
-            if (property.Getter != null)
-            {
-                var getMethod = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
-                    .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(property.Getter)));
-                propertyDeclaration = propertyDeclaration.AddAccessorListAccessors(getMethod);
-            }
-
-            if (property.Setter != null)
-            {
-                var setMethod = SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
-                    .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(property.Setter)));
-
-                propertyDeclaration = propertyDeclaration.AddAccessorListAccessors(setMethod);
-            }
-
-            SetContext(propertyDeclaration);
-
-            root = AddMemberToType(root, propertyDeclaration);
-
-            return this;
-        }
-
-        public EasyPropertyInfo ExtractPropertyFromTemplate(string propertyName)
-        {
-            if (string.IsNullOrEmpty(propertyName))
-            {
-                throw new ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
-            }
-
-            if (templateRoot == null)
-            {
-                throw new InvalidOperationException("Template root is not set. Please set a template first.");
-            }
-
-            var property = templateRoot.DescendantNodes()
-                .OfType<PropertyDeclarationSyntax>()
-                .FirstOrDefault(p => p.Identifier.Text == propertyName);
-
-            if (property == null)
-            {
-                throw new Exception($"Property '{propertyName}' not found in the template.");
-            }
-
-            var propertyInfo = new EasyPropertyInfo
-            {
-                Name = property.Identifier.Text,
-                Type = property.Type.ToString(),
-                Modifiers = property.Modifiers.Select(m => m.Kind()).ToArray(),
-                Getter = property.AccessorList?.Accessors
-                    .FirstOrDefault(a => a.IsKind(SyntaxKind.GetAccessorDeclaration))?.Body?.ToString(),
-                Setter = property.AccessorList?.Accessors
-                    .FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration))?.Body?.ToString()
-            };
-
-            return propertyInfo;
-        }
+        // public EasyPropertyInfo ExtractPropertyFromTemplate(string propertyName)
+        // {
+        //     if (string.IsNullOrEmpty(propertyName))
+        //     {
+        //         throw new ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
+        //     }
+        //
+        //     if (templateRoot == null)
+        //     {
+        //         throw new InvalidOperationException("Template root is not set. Please set a template first.");
+        //     }
+        //
+        //     var property = templateRoot.DescendantNodes()
+        //         .OfType<PropertyDeclarationSyntax>()
+        //         .FirstOrDefault(p => p.Identifier.Text == propertyName);
+        //
+        //     if (property == null)
+        //     {
+        //         throw new Exception($"Property '{propertyName}' not found in the template.");
+        //     }
+        //
+        //     var propertyInfo = new EasyPropertyInfo
+        //     {
+        //         Name = property.Identifier.Text,
+        //         Type = property.Type.ToString(),
+        //         Modifiers = property.Modifiers.Select(m => m.Kind()).ToArray(),
+        //         Getter = property.AccessorList?.Accessors
+        //             .FirstOrDefault(a => a.IsKind(SyntaxKind.GetAccessorDeclaration))?.Body?.ToString(),
+        //         Setter = property.AccessorList?.Accessors
+        //             .FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration))?.Body?.ToString()
+        //     };
+        //
+        //     return propertyInfo;
+        // }
 
         public EasyCodeBuilder AddMethod(Func<EasyMethodBuilder, BaseMethodDeclarationSyntax> methodBuilderInstructions)
         {

@@ -6,14 +6,16 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
-    public class EasyMethodBuilder
+    public class EasyMethodBuilder : EasyBasicBuilder
     {
-        private SyntaxNode templateRoot;
         private string name;
-        private BaseMethodDeclarationSyntax methodDeclaration;
+        private string returnType;
+        private (string, string)[] parameters;
+        private SyntaxKind[] modifiers;
         private string body;
+        private SyntaxNode templateRoot;
 
-        public EasyMethodBuilder(SyntaxNode templateRoot)
+        public EasyMethodBuilder(SyntaxNode templateRoot) : base(templateRoot)
         {
             this.templateRoot = templateRoot;
         }
@@ -36,8 +38,7 @@ namespace easycodegenunity.Editor.Core.Builders
                 throw new ArgumentException("Return type cannot be null or empty.", nameof(type));
             }
 
-            methodDeclaration = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName(type), name);
-
+            returnType = type;
             return this;
         }
 
@@ -59,18 +60,7 @@ namespace easycodegenunity.Editor.Core.Builders
                 throw new ArgumentException("Parameters cannot be null or empty.", nameof(parameters));
             }
 
-            if (methodDeclaration == null)
-            {
-                throw new InvalidOperationException(
-                    "Method name and return type must be set before adding parameters.");
-            }
-
-            var parameterList = SyntaxFactory.ParameterList(
-                SyntaxFactory.SeparatedList(parameters.Select(p =>
-                    SyntaxFactory.Parameter(SyntaxFactory.Identifier(p.Item2))
-                        .WithType(SyntaxFactory.ParseTypeName(p.Item1)))));
-            methodDeclaration = methodDeclaration.WithParameterList(parameterList);
-
+            this.parameters = parameters;
             return this;
         }
 
@@ -81,16 +71,7 @@ namespace easycodegenunity.Editor.Core.Builders
                 throw new ArgumentException("Modifiers cannot be null or empty.", nameof(modifiers));
             }
 
-            if (methodDeclaration == null)
-            {
-                throw new InvalidOperationException("Method name and return type must be set before adding modifiers.");
-            }
-
-            foreach (var modifier in modifiers)
-            {
-                methodDeclaration = methodDeclaration.AddModifiers(SyntaxFactory.Token(modifier));
-            }
-
+            this.modifiers = modifiers;
             return this;
         }
 
@@ -150,14 +131,36 @@ namespace easycodegenunity.Editor.Core.Builders
 
         public BaseMethodDeclarationSyntax Build()
         {
-            if (methodDeclaration == null)
+            if (string.IsNullOrWhiteSpace(returnType))
             {
                 throw new InvalidOperationException(
                     "Method declaration is not set. Please set a method name and return type first.");
             }
 
-            var bodySyntax = SyntaxFactory.Block(SyntaxFactory.ParseStatement(body));
-            methodDeclaration = methodDeclaration.WithBody(bodySyntax);
+            MethodDeclarationSyntax methodDeclaration = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName(returnType), name);
+
+            if (parameters != null)
+            {
+                var parameterList = SyntaxFactory.ParameterList(
+                    SyntaxFactory.SeparatedList(parameters.Select(p =>
+                        SyntaxFactory.Parameter(SyntaxFactory.Identifier(p.Item2))
+                            .WithType(SyntaxFactory.ParseTypeName(p.Item1)))));
+                methodDeclaration = methodDeclaration.WithParameterList(parameterList);
+            }
+
+            if (modifiers != null)
+            {
+                foreach (var modifier in modifiers)
+                {
+                    methodDeclaration = methodDeclaration.AddModifiers(SyntaxFactory.Token(modifier));
+                }
+            }
+
+            if (!string.IsNullOrEmpty(body))
+            {
+                var bodySyntax = SyntaxFactory.Block(SyntaxFactory.ParseStatement(body));
+                methodDeclaration = methodDeclaration.WithBody(bodySyntax);
+            }
 
             return methodDeclaration;
         }
