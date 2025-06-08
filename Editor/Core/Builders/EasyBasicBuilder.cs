@@ -9,8 +9,6 @@ namespace easycodegenunity.Editor.Core.Builders
 {
     public abstract class EasyBasicBuilder
     {
-        //todo: move comment buildings here
-
         protected SyntaxNode templateRoot;
 
         private string comment;

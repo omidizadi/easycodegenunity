@@ -108,6 +108,22 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        public EasyBasicBuilder ReplaceInConstructorBody(string search, string replace)
+        {
+            if (string.IsNullOrWhiteSpace(constructorBody))
+            {
+                throw new InvalidOperationException("Constructor body is not set. Please set it before replacing.");
+            }
+
+            if (string.IsNullOrWhiteSpace(search) || string.IsNullOrWhiteSpace(replace))
+            {
+                throw new ArgumentException("Search and replace strings cannot be null or empty.");
+            }
+
+            constructorBody = constructorBody.Replace(search, replace);
+            return this;
+        }
+
         protected override MemberDeclarationSyntax BuildDeclarationSyntax()
         {
             if (string.IsNullOrWhiteSpace(name))
