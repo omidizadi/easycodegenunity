@@ -129,7 +129,7 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
-        public BaseMethodDeclarationSyntax Build()
+        protected override MemberDeclarationSyntax BuildDeclarationSyntax()
         {
             if (string.IsNullOrWhiteSpace(returnType))
             {
@@ -137,7 +137,8 @@ namespace easycodegenunity.Editor.Core.Builders
                     "Method declaration is not set. Please set a method name and return type first.");
             }
 
-            MethodDeclarationSyntax methodDeclaration = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName(returnType), name);
+            MethodDeclarationSyntax methodDeclaration =
+                SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName(returnType), name);
 
             if (parameters != null)
             {

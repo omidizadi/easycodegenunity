@@ -12,6 +12,8 @@ namespace easycodegenunity.Editor.Core.Builders
         private string baseType;
         private string[] interfaces;
         private SyntaxKind[] modifiers;
+        private string constructorBody;
+        private (string, string)[] constructorParameters;
 
         public EasyTypeBuilder WithName(string name)
         {
@@ -69,7 +71,44 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
-        public BaseTypeDeclarationSyntax Build()
+        public EasyTypeBuilder WithConstructor(string body, params (string, string)[] parameters)
+        {
+            if (string.IsNullOrWhiteSpace(body))
+            {
+                throw new ArgumentException("Constructor body cannot be null or empty.", nameof(body));
+            }
+
+            constructorBody = body;
+            constructorParameters =
+                parameters ?? throw new ArgumentException("Parameters cannot be null.", nameof(parameters));
+            return this;
+        }
+
+        public EasyBasicBuilder WithConstructorFromTemplate()
+        {
+            // extract the constructor from the template root, if null, throw an exception
+            if (templateRoot == null)
+            {
+                throw new InvalidOperationException("Template root is not set. Please set a template first.");
+            }
+
+            var constructor = templateRoot.DescendantNodes()
+                .OfType<ConstructorDeclarationSyntax>()
+                .FirstOrDefault(c => c.Identifier.Text == name);
+
+            if (constructor?.Body == null)
+            {
+                throw new InvalidOperationException($"Constructor for type '{name}' not found in the template.");
+            }
+
+            constructorBody = constructor.Body.ToString();
+            constructorParameters = constructor.ParameterList.Parameters
+                .Select(p => (p.Identifier.Text, p.Type?.ToString())).ToArray();
+
+            return this;
+        }
+
+        protected override MemberDeclarationSyntax BuildDeclarationSyntax()
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -118,6 +157,27 @@ namespace easycodegenunity.Editor.Core.Builders
                         SyntaxFactory.BaseList(SyntaxFactory.SeparatedList<BaseTypeSyntax>(interfaceList)));
                 }
             }
+
+            if (string.IsNullOrWhiteSpace(constructorBody) || constructorParameters == null)
+            {
+                return typeDeclaration;
+            }
+
+            var parameters = SyntaxFactory.ParameterList(
+                SyntaxFactory.SeparatedList(constructorParameters.Select(p =>
+                    SyntaxFactory.Parameter(SyntaxFactory.Identifier(p.Item2))
+                        .WithType(SyntaxFactory.ParseTypeName(p.Item1)))));
+
+            var constructor = SyntaxFactory.ConstructorDeclaration(name)
+                .WithParameterList(parameters)
+                .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(constructorBody)));
+
+            typeDeclaration = typeDeclaration switch
+            {
+                ClassDeclarationSyntax classDeclaration => classDeclaration.AddMembers(constructor),
+                StructDeclarationSyntax structDeclaration => structDeclaration.AddMembers(constructor),
+                _ => typeDeclaration
+            };
 
             return typeDeclaration;
         }

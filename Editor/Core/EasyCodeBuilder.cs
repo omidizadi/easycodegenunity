@@ -15,7 +15,6 @@ namespace easycodegenunity.Editor.Core
         private SyntaxNode root;
         private string outputPath;
         public string GeneratedCode { get; private set; }
-        private MemberDeclarationSyntax currentMemberContext;
 
         public EasyCodeBuilder WithTemplate<T>()
         {
@@ -68,7 +67,7 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
-        public EasyCodeBuilder AddType(Func<EasyTypeBuilder, BaseTypeDeclarationSyntax> typeBuilderInstructions)
+        public EasyCodeBuilder AddType(Func<EasyTypeBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
         {
             var typeBuilder = new EasyTypeBuilder();
             var typeDeclaration = typeBuilderInstructions(typeBuilder);
@@ -76,7 +75,7 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
-        public EasyCodeBuilder AddField(Func<EasyFieldBuilder, BaseFieldDeclarationSyntax> fieldBuilderInstructions)
+        public EasyCodeBuilder AddField(Func<EasyFieldBuilder, MemberDeclarationSyntax> fieldBuilderInstructions)
         {
             var fieldBuilder = new EasyFieldBuilder();
             var fieldDeclaration = fieldBuilderInstructions(fieldBuilder);
@@ -84,70 +83,7 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
-        // public EasyCodeBuilder AddProperty(EasyPropertyInfo property)
-        // {
-        //     var propertyDeclaration = SyntaxFactory.PropertyDeclaration(
-        //             SyntaxFactory.ParseTypeName(property.Type), property.Name)
-        //         .WithModifiers(SyntaxFactory.TokenList(property.Modifiers.Select(SyntaxFactory.Token)));
-        //
-        //     if (property.Getter != null)
-        //     {
-        //         var getMethod = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
-        //             .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(property.Getter)));
-        //         propertyDeclaration = propertyDeclaration.AddAccessorListAccessors(getMethod);
-        //     }
-        //
-        //     if (property.Setter != null)
-        //     {
-        //         var setMethod = SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
-        //             .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(property.Setter)));
-        //
-        //         propertyDeclaration = propertyDeclaration.AddAccessorListAccessors(setMethod);
-        //     }
-        //
-        //     SetContext(propertyDeclaration);
-        //
-        //     root = AddMemberToType(root, propertyDeclaration);
-        //
-        //     return this;
-        // }
-
-        // public EasyPropertyInfo ExtractPropertyFromTemplate(string propertyName)
-        // {
-        //     if (string.IsNullOrEmpty(propertyName))
-        //     {
-        //         throw new ArgumentNullException(nameof(propertyName), "Property name cannot be null or empty.");
-        //     }
-        //
-        //     if (templateRoot == null)
-        //     {
-        //         throw new InvalidOperationException("Template root is not set. Please set a template first.");
-        //     }
-        //
-        //     var property = templateRoot.DescendantNodes()
-        //         .OfType<PropertyDeclarationSyntax>()
-        //         .FirstOrDefault(p => p.Identifier.Text == propertyName);
-        //
-        //     if (property == null)
-        //     {
-        //         throw new Exception($"Property '{propertyName}' not found in the template.");
-        //     }
-        //
-        //     var propertyInfo = new EasyPropertyInfo
-        //     {
-        //         Name = property.Identifier.Text,
-        //         Type = property.Type.ToString(),
-        //         Modifiers = property.Modifiers.Select(m => m.Kind()).ToArray(),
-        //         Getter = property.AccessorList?.Accessors
-        //             .FirstOrDefault(a => a.IsKind(SyntaxKind.GetAccessorDeclaration))?.Body?.ToString(),
-        //         Setter = property.AccessorList?.Accessors
-        //             .FirstOrDefault(a => a.IsKind(SyntaxKind.SetAccessorDeclaration))?.Body?.ToString()
-        //     };
-        //
-        //     return propertyInfo;
-        // }
-
-        public EasyCodeBuilder AddMethod(Func<EasyMethodBuilder, BaseMethodDeclarationSyntax> methodBuilderInstructions)
+        public EasyCodeBuilder AddMethod(Func<EasyMethodBuilder, MemberDeclarationSyntax> methodBuilderInstructions)
         {
             var methodBuilder = new EasyMethodBuilder(templateRoot);
             var methodDeclaration = methodBuilderInstructions(methodBuilder);
@@ -155,110 +91,13 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
-
-        public EasyCodeBuilder AddComment(string comment, bool isXmlDoc = false)
+        public EasyCodeBuilder AddProperty(
+            Func<EasyPropertyBuilder, MemberDeclarationSyntax> propertyBuilderInstructions)
         {
-            if (string.IsNullOrEmpty(comment))
-                throw new ArgumentNullException(nameof(comment), "Comment text cannot be null or empty.");
-
-            if (currentMemberContext == null)
-                throw new InvalidOperationException(
-                    "No active context. Add a class, method, property, or field first.");
-
-            SyntaxTrivia commentTrivia;
-            if (isXmlDoc)
-            {
-                var lines = comment.Split('\n');
-                var leadingTrivia = currentMemberContext.GetLeadingTrivia();
-                for (var i = 0; i < lines.Length; i++)
-                {
-                    var line = lines[i];
-                    string commentStart = i == 0 ? "///" : string.Empty;
-                    leadingTrivia = leadingTrivia.Add(SyntaxFactory.Comment(commentStart + line.Trim()))
-                        .Add(SyntaxFactory.CarriageReturnLineFeed);
-                }
-
-                var newContextXml = currentMemberContext.WithLeadingTrivia(leadingTrivia);
-                root = root.ReplaceNode(currentMemberContext, newContextXml);
-                currentMemberContext = newContextXml;
-                return this;
-            }
-
-            if (comment.Contains('\n'))
-            {
-                commentTrivia = SyntaxFactory.Comment("/* " + comment + " */");
-            }
-            else
-            {
-                commentTrivia = SyntaxFactory.Comment("// " + comment);
-            }
-
-            var newContext = currentMemberContext.WithLeadingTrivia(
-                currentMemberContext.GetLeadingTrivia().Add(commentTrivia).Add(SyntaxFactory.CarriageReturnLineFeed));
-
-            root = root.ReplaceNode(currentMemberContext, newContext);
-            currentMemberContext = newContext;
+            var propertyBuilder = new EasyPropertyBuilder(templateRoot);
+            var propertyDeclaration = propertyBuilderInstructions(propertyBuilder);
+            root = AddMemberToType(root, propertyDeclaration);
             return this;
-        }
-
-        public string ExtractCommentFromTemplate(string memberName)
-        {
-            if (string.IsNullOrEmpty(memberName))
-            {
-                throw new ArgumentNullException(nameof(memberName), "Name cannot be null or empty.");
-            }
-
-            if (templateRoot == null)
-            {
-                throw new InvalidOperationException("Template root is not set. Please set a template first.");
-            }
-
-            SyntaxNode namedNode = FindNamedNode(memberName);
-
-            if (namedNode == null)
-            {
-                return string.Empty;
-            }
-
-            var leadingTrivia = namedNode.GetLeadingTrivia();
-
-            var commentBuilder = new System.Text.StringBuilder();
-            bool hasComment = false;
-
-            foreach (var trivia in leadingTrivia)
-            {
-                if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
-                {
-                    string text = trivia.ToString().TrimStart('/').Trim();
-                    commentBuilder.AppendLine(text);
-                    hasComment = true;
-                }
-                else if (trivia.IsKind(SyntaxKind.MultiLineCommentTrivia))
-                {
-                    string text = trivia.ToString();
-                    text = text.Substring(2, text.Length - 4).Trim();
-                    commentBuilder.AppendLine(text);
-                    hasComment = true;
-                }
-                else if (trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia))
-                {
-                    string text = trivia.ToString().TrimStart('/').Trim();
-                    commentBuilder.AppendLine(text);
-                    hasComment = true;
-                }
-            }
-
-            return hasComment ? commentBuilder.ToString().TrimEnd() : string.Empty;
-        }
-
-        public EasyCodeBuilder AddAttribute<T>(params string[] parameters)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public EasyCodeBuilder AddConstructor(string[] parameters = null, string constructorBody = null)
-        {
-            throw new System.NotImplementedException();
         }
 
         public EasyCodeBuilder SetDirectory(string path)
@@ -316,42 +155,6 @@ namespace easycodegenunity.Editor.Core
         public void Save()
         {
             System.IO.File.WriteAllText(outputPath, GeneratedCode);
-        }
-
-
-        private SyntaxNode FindNamedNode(string name)
-        {
-            var typeDeclaration = templateRoot.DescendantNodes().OfType<BaseTypeDeclarationSyntax>()
-                .FirstOrDefault(t => t.Identifier.Text == name);
-            if (typeDeclaration != null)
-                return typeDeclaration;
-
-            var methodDeclaration = templateRoot.DescendantNodes().OfType<MethodDeclarationSyntax>()
-                .FirstOrDefault(m => m.Identifier.Text == name);
-            if (methodDeclaration != null)
-                return methodDeclaration;
-
-            var propertyDeclaration = templateRoot.DescendantNodes().OfType<PropertyDeclarationSyntax>()
-                .FirstOrDefault(p => p.Identifier.Text == name);
-            if (propertyDeclaration != null)
-                return propertyDeclaration;
-
-            var fieldDeclaration = templateRoot.DescendantNodes().OfType<FieldDeclarationSyntax>()
-                .FirstOrDefault(f => f.Declaration.Variables.Any(v => v.Identifier.Text == name));
-            if (fieldDeclaration != null)
-                return fieldDeclaration;
-
-            var enumMemberDeclaration = templateRoot.DescendantNodes().OfType<EnumMemberDeclarationSyntax>()
-                .FirstOrDefault(e => e.Identifier.Text == name);
-            if (enumMemberDeclaration != null)
-                return enumMemberDeclaration;
-
-            return null; // No matching node found
-        }
-
-        private void SetContext(MemberDeclarationSyntax memberSyntax)
-        {
-            currentMemberContext = memberSyntax;
         }
 
         private SyntaxNode AddMemberToType(SyntaxNode rootNode, MemberDeclarationSyntax member)

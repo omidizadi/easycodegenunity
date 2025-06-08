@@ -52,7 +52,7 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
-        public BaseFieldDeclarationSyntax Build()
+        protected override MemberDeclarationSyntax BuildDeclarationSyntax()
         {
             if (string.IsNullOrWhiteSpace(type))
             {
