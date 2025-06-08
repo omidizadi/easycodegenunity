@@ -58,7 +58,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
                 }
 
                 builder
-                    .SetDirectory("Assets/easycodegenunity/Editor/Samples/GameDataExample/Generated")
+                    .SetDirectory("Assets/easycodegenunity/Editor/Samples/GameDataExample/Runtime/Generated")
                     .SetFileName(queryResult.Name + "Events.cs")
                     .Generate()
                     .Save();

@@ -63,11 +63,17 @@ namespace easycodegenunity.Editor.Core.Builders
         public MemberDeclarationSyntax Build()
         {
             var memberDeclaration = BuildDeclarationSyntax();
-            memberDeclaration
-                .WithLeadingTrivia(SyntaxFactory.TriviaList(SyntaxFactory.Comment(comment)))
-                .WithAttributeLists(attributes != null
-                    ? SyntaxFactory.SingletonList(attributes)
-                    : SyntaxFactory.List<AttributeListSyntax>());
+
+            if (comment != null)
+            {
+                memberDeclaration =
+                    memberDeclaration.WithLeadingTrivia(SyntaxFactory.TriviaList(SyntaxFactory.Comment(comment)));
+            }
+
+            if (attributes != null)
+            {
+                memberDeclaration = memberDeclaration.WithAttributeLists(SyntaxFactory.SingletonList(attributes));
+            }
 
             return memberDeclaration;
         }
