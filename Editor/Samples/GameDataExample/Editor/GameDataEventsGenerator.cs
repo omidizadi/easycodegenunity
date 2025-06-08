@@ -18,9 +18,8 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
                     .AddUsingStatement("System")
                     .AddUsingStatement("UnityEngine")
                     .AddNamespace(queryResult.Namespace)
-                    .AddType(tb => tb
+                    .AddStruct(tb => tb
                         .WithName(queryResult.Name)
-                        .WithType(EasyType.Struct)
                         .WithModifiers(SyntaxKind.PublicKeyword, SyntaxKind.PartialKeyword)
                         .Build());
 

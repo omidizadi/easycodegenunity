@@ -1,0 +1,18 @@
+{
+    "name": "easycodegenunity.Samples.BasicExamples.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:109c9b6833d684de6a319b0f2ce0c931"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

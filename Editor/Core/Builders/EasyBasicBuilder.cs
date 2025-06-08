@@ -3,7 +3,6 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using PlasticGui;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
@@ -21,8 +20,7 @@ namespace easycodegenunity.Editor.Core.Builders
 
         protected EasyBasicBuilder(SyntaxNode templateRoot)
         {
-            this.templateRoot = templateRoot ??
-                                throw new ArgumentNullException(nameof(templateRoot), "Template root cannot be null.");
+            this.templateRoot = templateRoot;
         }
 
         public EasyBasicBuilder WithComment(string comment)

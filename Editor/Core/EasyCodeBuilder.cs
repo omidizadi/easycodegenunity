@@ -67,11 +67,35 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
-        public EasyCodeBuilder AddType(Func<EasyTypeBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
+        public EasyCodeBuilder AddClass(Func<EasyClassBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
         {
-            var typeBuilder = new EasyTypeBuilder();
-            var typeDeclaration = typeBuilderInstructions(typeBuilder);
+            var classBuilder = new EasyClassBuilder();
+            var typeDeclaration = typeBuilderInstructions(classBuilder);
             root = AddMemberToType(root, typeDeclaration);
+            return this;
+        }
+
+        public EasyCodeBuilder AddStruct(Func<EasyTypeBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
+        {
+            var structBuilder = new EasyStructBuilder();
+            var typeDeclaration = typeBuilderInstructions(structBuilder);
+            root = AddMemberToType(root, typeDeclaration);
+            return this;
+        }
+
+        public EasyCodeBuilder AddInterface(Func<EasyInterfaceBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
+        {
+            var interfaceBuilder = new EasyInterfaceBuilder();
+            var typeDeclaration = typeBuilderInstructions(interfaceBuilder);
+            root = AddMemberToType(root, typeDeclaration);
+            return this;
+        }
+
+        public EasyCodeBuilder AddEnum(Func<EasyEnumBuilder, MemberDeclarationSyntax> enumBuilderInstructions)
+        {
+            var enumBuilder = new EasyEnumBuilder();
+            var enumDeclaration = enumBuilderInstructions(enumBuilder);
+            root = AddMemberToType(root, enumDeclaration);
             return this;
         }
 
