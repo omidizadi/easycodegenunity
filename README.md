@@ -11,15 +11,15 @@ A powerful code generation tool for Unity that simplifies creating boilerplate c
 
 ## 📋 Table of Contents
 
-- [Why Easy Code Gen?](#why-easy-code-gen)
-- [Features](#features)
-- [Installation](#installation)
-- [Quick Start Examples](#quick-start-examples)
-- [Where Code Generation Shines](#where-code-generation-shines)
-- [Optional Samples](#optional-samples)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [License](#license)
+- [Why Easy Code Gen?](#-why-easy-code-gen)
+- [Features](#-features)
+- [Installation](#-installation)
+- [Quick Start Examples](#-quick-start-examples)
+- [Where Code Generation Shines](#-where-code-generation-shines)
+- [Optional Samples](#-optional-samples)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## ✨ Why Easy Code Gen?
 
