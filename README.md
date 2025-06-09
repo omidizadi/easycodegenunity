@@ -106,7 +106,7 @@ new EasyCodeBuilder()
         .WithReturnType("void")
         .WithModifiers(SyntaxKind.PublicKeyword)
         .WithParameters(("int", "amount"))
-        .WithBodyFromTemplate("TakeDamage")
+        .WithBodyFromTemplate(nameof(GameDataEventTemplate.TakeDamage))
         .ReplaceInBody("_TARGET_FIELD_", "health")
         .Build())
     .SetDirectory("Assets/Scripts/Generated")
@@ -126,6 +126,7 @@ foreach (var queryResult in EasyQuery.WithAttribute<GameData>())
     // Build a new code file based on query results
     var builder = new EasyCodeBuilder();
     builder
+        .WithTemplate<GameDataControllerTemplate>()
         .AddUsingStatement("System")
         .AddUsingStatement("UnityEngine")
         .AddNamespace(queryResult.Namespace)
@@ -145,7 +146,8 @@ foreach (var queryResult in EasyQuery.WithAttribute<GameData>())
                 .WithName($"Process{memberQueryResult.Name.ToPascalCase()}")
                 .WithReturnType("void")
                 .WithModifiers(SyntaxKind.PublicKeyword)
-                .WithBody($"Debug.Log($\"Processing {memberQueryResult.Name}\");")
+                .WithBodyFromTemplate(nameof(GameDataControllerTemplate.ProcessMember))
+                .ReplaceInBody("_MEMBER_NAME_", memberQueryResult.Name)
                 .Build());
     }
     
