@@ -1,7 +1,7 @@
 namespace easycodegenunity.Editor.Samples.BasicExamples
 {
-    public interface SampleInterface
+    public interface IInterfaceB
     {
-        void SampleDoSomething();
+        void DoSomethingB();
     }
 }

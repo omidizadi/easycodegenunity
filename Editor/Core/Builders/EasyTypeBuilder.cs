@@ -7,10 +7,13 @@ namespace easycodegenunity.Editor.Core.Builders
 {
     public abstract class EasyTypeBuilder : EasyBasicBuilder
     {
-        private string name;
         private string baseType;
         private string[] interfaces;
         private SyntaxKind[] modifiers;
+        private string constructorBody;
+        private (string, string)[] constructorParameters;
+        private EasyConstructorBuilder constructorBuilder;
+        protected string name { get; set; }
 
         public EasyTypeBuilder WithName(string name)
         {
@@ -22,8 +25,6 @@ namespace easycodegenunity.Editor.Core.Builders
             this.name = name;
             return this;
         }
-
-        public string Name => name;
 
         public EasyTypeBuilder WithBaseType(string type)
         {
@@ -106,5 +107,28 @@ namespace easycodegenunity.Editor.Core.Builders
         }
 
         protected abstract BaseTypeDeclarationSyntax CreateTypeDeclaration();
+
+        protected bool HasConstructor()
+        {
+            return (!string.IsNullOrWhiteSpace(constructorBody) && constructorParameters != null) ||
+                   constructorBuilder != null;
+        }
+
+        protected ConstructorDeclarationSyntax CreateConstructorDeclaration()
+        {
+            if (constructorBuilder != null)
+            {
+                return (ConstructorDeclarationSyntax)constructorBuilder.Build();
+            }
+
+            var parameters = SyntaxFactory.ParameterList(
+                SyntaxFactory.SeparatedList(constructorParameters.Select(p =>
+                    SyntaxFactory.Parameter(SyntaxFactory.Identifier(p.Item2))
+                        .WithType(SyntaxFactory.ParseTypeName(p.Item1)))));
+
+            return SyntaxFactory.ConstructorDeclaration(name)
+                .WithParameterList(parameters)
+                .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(constructorBody)));
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -59,31 +60,40 @@ namespace easycodegenunity.Editor.Core.Builders
                 throw new InvalidOperationException("Field type must be set before building.");
             }
 
-            var fieldDeclaration = SyntaxFactory.FieldDeclaration(
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName(type))
-                    .WithVariables(SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier(name)))));
-
-            if (modifiers != null)
-            {
-                foreach (var modifier in modifiers)
-                {
-                    fieldDeclaration = fieldDeclaration.AddModifiers(SyntaxFactory.Token(modifier));
-                }
-            }
-
+            var variableDeclarator = SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier(name));
+            
+            // Add initializer if an initial value was set
             if (initialValueSet)
             {
-                var initializer = SyntaxFactory.EqualsValueClause(
-                    SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(initialValue.ToString())));
-                fieldDeclaration = fieldDeclaration.WithDeclaration(
-                    fieldDeclaration.Declaration.WithVariables(
-                        SyntaxFactory.SingletonSeparatedList(
-                            fieldDeclaration.Declaration.Variables[0].WithInitializer(initializer))));
+                variableDeclarator = variableDeclarator.WithInitializer(
+                    SyntaxFactory.EqualsValueClause(CreateExpressionFromValue(initialValue)));
+            }
+
+            var fieldDeclaration = SyntaxFactory.FieldDeclaration(
+                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName(type))
+                    .WithVariables(SyntaxFactory.SingletonSeparatedList(variableDeclarator)));
+
+            // Add modifiers if any
+            if (modifiers != null)
+            {
+                fieldDeclaration = fieldDeclaration.AddModifiers(modifiers.Select(SyntaxFactory.Token).ToArray());
             }
 
             return fieldDeclaration;
+        }
+
+        private ExpressionSyntax CreateExpressionFromValue(object value)
+        {
+            return value switch
+            {
+                null => SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression),
+                string s => SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(s)),
+                bool b => SyntaxFactory.LiteralExpression(b ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression),
+                int i => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(i)),
+                float f => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(f)),
+                double d => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(d)),
+                _ => SyntaxFactory.ParseExpression(value.ToString())
+            };
         }
     }
 }

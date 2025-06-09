@@ -44,7 +44,7 @@ namespace easycodegenunity.Editor.Core.Builders
 
         protected override BaseTypeDeclarationSyntax CreateTypeDeclaration()
         {
-            var enumDeclaration = SyntaxFactory.EnumDeclaration(Name);
+            var enumDeclaration = SyntaxFactory.EnumDeclaration(name);
             
             if (members.Count > 0)
             {

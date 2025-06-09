@@ -83,6 +83,14 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        public EasyCodeBuilder AddConstructor(Func<EasyConstructorBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
+        {
+            var constructorBuilder = new EasyConstructorBuilder();
+            var constructorDeclaration = typeBuilderInstructions(constructorBuilder);
+            root = AddMemberToType(root, constructorDeclaration);
+            return this;
+        }
+
         public EasyCodeBuilder AddInterface(Func<EasyInterfaceBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
         {
             var interfaceBuilder = new EasyInterfaceBuilder();

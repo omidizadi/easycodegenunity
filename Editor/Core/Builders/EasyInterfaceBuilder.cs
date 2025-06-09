@@ -7,7 +7,7 @@ namespace easycodegenunity.Editor.Core.Builders
     {
         protected override BaseTypeDeclarationSyntax CreateTypeDeclaration()
         {
-            return SyntaxFactory.InterfaceDeclaration(Name);
+            return SyntaxFactory.InterfaceDeclaration(name);
         }
     }
 }

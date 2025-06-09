@@ -5,11 +5,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
-    public class EasyStructBuilder : EasyTypeWithConstructorBuilder
+    public class EasyStructBuilder : EasyTypeBuilder
     {
         protected override BaseTypeDeclarationSyntax CreateTypeDeclaration()
         {
-            var structDeclaration = SyntaxFactory.StructDeclaration(Name);
+            var structDeclaration = SyntaxFactory.StructDeclaration(name);
             
             if (HasConstructor())
             {
