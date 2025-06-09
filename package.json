@@ -1,0 +1,32 @@
+{
+  "name": "com.omidizadi.easycodegen",
+  "version": "1.0.0",
+  "displayName": "Easy Code Gen",
+  "description": "A code generation tool for Unity",
+  "unity": "2020.3",
+  "documentationUrl": "https://github.com/omidizadi/EasyCodeGen",
+  "licensesUrl": "https://github.com/omidizadi/EasyCodeGen/blob/main/LICENSE",
+  "keywords": [
+    "code generation",
+    "unity",
+    "tool"
+  ],
+  "author": {
+    "name": "Omid Izadi",
+    "email": "your-email@example.com",
+    "url": "https://github.com/omidizadi"
+  },
+  "samples": [
+    {
+      "displayName": "Basic Examples",
+      "description": "Basic examples of code generation",
+      "path": "Samples~/BasicExamples"
+    },
+    {
+      "displayName": "Game Data Example",
+      "description": "Example of generating game data code",
+      "path": "Samples~/GameDataExample"
+    }
+  ]
+}
+
