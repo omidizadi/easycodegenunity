@@ -3,6 +3,9 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
 {
+    /// <summary>
+    /// This sample demonstrates how to create a static class with a method using EasyCodeGenerator.
+    /// </summary>
     public class _2_SampleStaticClass : IEasyCodeGenerator
     {
         public void Execute()

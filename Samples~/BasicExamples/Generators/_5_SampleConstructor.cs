@@ -3,6 +3,9 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
 {
+    /// <summary>
+    /// This sample shows how to create a class with a constructor using EasyCodeGenerator.
+    /// </summary>
     public class _5_SampleConstructor : IEasyCodeGenerator
     {
         public void Execute()
@@ -24,10 +27,10 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithModifiers(SyntaxKind.PrivateKeyword)
                     .WithType("string")
                     .Build())
-                .AddConstructor(constructorBuilder => constructorBuilder
+                .AddConstructor(constructorBuilder => constructorBuilder // define the constructor
                     .WithClassName("SampleClassWithConstructor")
                     .WithBody(
-                        @"Console.WriteLine(""Constructor called!"");",
+                        @"Console.WriteLine(""Constructor called!"");", // each statement of the body should be a string
                         @"this.name = name;",
                         @"this.age = age;")
                     .WithParameters(("string", "name"), ("int", "age"))
