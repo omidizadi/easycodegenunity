@@ -2,7 +2,7 @@
     "name": "easycodegenunity.Samples.BasicExamples.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:109c9b6833d684de6a319b0f2ce0c931"
+        "EasyCodeGen"
     ],
     "includePlatforms": [
         "Editor"

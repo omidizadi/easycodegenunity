@@ -6,6 +6,10 @@
   "unity": "2020.3",
   "documentationUrl": "https://github.com/omidizadi/EasyCodeGen",
   "licensesUrl": "https://github.com/omidizadi/EasyCodeGen/blob/main/LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omidizadi/easycodegenunity.git"
+  },
   "keywords": [
     "code generation",
     "unity",
@@ -29,4 +33,3 @@
     }
   ]
 }
-

@@ -2,8 +2,8 @@
     "name": "easycodegenunity.Samples.GameDataExample.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:965d177b638f4488782ac6b591aca169",
-        "GUID:109c9b6833d684de6a319b0f2ce0c931"
+        "EasyCodeGen",
+        "easycodegenunity.Samples.GameDataExample"
     ],
     "includePlatforms": [
         "Editor"
