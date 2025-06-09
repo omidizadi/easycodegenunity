@@ -1,3 +1,5 @@
+![Header](https://github.com/user-attachments/assets/cecbf62f-3b42-4a6d-8b8e-af0e960247cd)
+
 # Easy Code Gen for Unity
 
 A code generation tool for Unity that simplifies creating boilerplate code and repetitive code structures.
