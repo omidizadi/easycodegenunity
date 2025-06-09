@@ -18,11 +18,9 @@ namespace easycodegenunity.Editor.Core.Builders
         private string setterBody;
         private bool hasGetter = true;
         private bool hasSetter = true;
-        private SyntaxNode templateRoot;
 
         public EasyPropertyBuilder(SyntaxNode templateRoot = null) : base(templateRoot)
         {
-            this.templateRoot = templateRoot;
         }
 
         public EasyPropertyBuilder WithName(string name)

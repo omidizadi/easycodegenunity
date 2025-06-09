@@ -13,11 +13,9 @@ namespace easycodegenunity.Editor.Core.Builders
         private (string, string)[] parameters;
         private SyntaxKind[] modifiers;
         private string body;
-        private SyntaxNode templateRoot;
 
         public EasyMethodBuilder(SyntaxNode templateRoot) : base(templateRoot)
         {
-            this.templateRoot = templateRoot;
         }
 
         public EasyMethodBuilder WithName(string name)

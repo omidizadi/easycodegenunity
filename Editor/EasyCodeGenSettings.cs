@@ -17,6 +17,14 @@ namespace com.omidizadi.EasyCodeGen
                 if (_instance == null)
                 {
                     _instance = Resources.Load<EasyCodeGenSettings>("EasyCodeGenSettings");
+                    if (_instance == null)
+                    {
+                        _instance = CreateInstance<EasyCodeGenSettings>();
+#if UNITY_EDITOR
+                        UnityEditor.AssetDatabase.CreateAsset(_instance, "Assets/Resources/EasyCodeGenSettings.asset");
+                        UnityEditor.AssetDatabase.SaveAssets();
+#endif
+                    }
                 }
 
                 return _instance;
