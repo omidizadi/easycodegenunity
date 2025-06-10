@@ -172,21 +172,21 @@ As your game grows, you'll likely need similar patterns across many systems:
 - **⚙️ State Machines**: Build state machine classes with common structure
 - **🔧 Editor Tools**: Create custom editors and property drawers
 
-### Solving the String-Based Template Problem 🧵
+### Benefits of Code Generation with EasyCodeGen ✨
 
-Traditional code generation often relies on string-based templates that cause significant issues:
+EasyCodeGen provides several advantages over traditional code generation approaches:
 
-- 💔 **Fragile to Changes**: Templates break silently when language syntax or APIs evolve
-- ⚠️ **Poor Error Detection**: Syntax errors can't be detected until runtime or code compilation
-- 🐛 **Hard to Debug**: String manipulation errors can be difficult to trace and resolve
-- 🔒 **Difficult Maintenance**: Templates require custom parsing that becomes a maintenance burden
+- 🔍 **Smart Code Querying**: Easily query your codebase to find types or members with specific attributes, interfaces, or base classes to generate code for
+  
+- 🌊 **Fluent and Intuitive API**: Clear, chainable methods make code generation readable and maintainable - what you see is what you get
 
-Easy Code Gen solves these issues with its approach:
+- 🏗️ **Compiled Class Templates**: Uses actual C# classes as templates instead of brittle string-based templates, giving you compile-time safety
 
-- 🧩 **Composition Over Templates**: Build code using structured objects instead of string manipulation
-- 🔄 **Refactoring Support**: IDE refactoring tools work with your code generation and template logic
-- 🛠️ **IDE Integration**: Get full intellisense and code completion when defining templates
-- ✅ **Immediate Validation**: Many errors are caught during development
+- 🧩 **Roslyn-Powered Generation**: Built on the .NET Compiler Platform for robust code generation with full language understanding
+
+- 🔄 **Low Template Maintenance**: No string templates means no escaping issues, no syntax errors in templates, and full IDE support
+
+- 🧪 **Testable Generation Logic**: Unit test your generators just like any other code in your project
 
 ## 📚 Optional Samples
 
