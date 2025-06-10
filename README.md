@@ -202,7 +202,7 @@ This package includes optional samples demonstrating how to use Easy Code Gen:
 
 ## 📖 Documentation
 
-For more detailed information on how to use Easy Code Gen, please refer to the [documentation](https://github.com/omidizadi/EasyCodeGen).
+For more detailed information on how to use Easy Code Gen, please refer to the [documentation](#).
 
 ## 👥 Contributing
 

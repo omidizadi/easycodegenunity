@@ -85,6 +85,93 @@ namespace easycodegenunity.Editor.Core
         }
 
         /// <summary>
+        /// Finds all types in a specific assembly by its name.
+        /// </summary>
+        /// <param name="assemblyName">The name of the assembly to search in.</param>
+        /// <returns>An EasyQueryCollection containing the results.</returns>
+        /// <exception cref="ArgumentException">Thrown if the assembly with the specified name is not found.</exception>
+        /// <exception cref="ArgumentException">Thrown if the assembly name is null or empty.</exception>
+        public static EasyQueryCollection WithAllTypesInAssembly(string assemblyName)
+        {
+            if (string.IsNullOrWhiteSpace(assemblyName))
+            {
+                throw new ArgumentException("Assembly name cannot be null or empty.", nameof(assemblyName));
+            }
+
+            var assembly = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(a => a.GetName().Name.Equals(assemblyName, StringComparison.OrdinalIgnoreCase));
+
+            if (assembly == null)
+            {
+                throw new ArgumentException($"Assembly '{assemblyName}' not found.");
+            }
+
+            var results = (from t in assembly.GetTypes()
+                    select new EasyQueryResult
+                    {
+                        Name = t.Name,
+                        FullName = t.FullName,
+                        Type = t,
+                        Namespace = t.Namespace
+                    })
+                .ToList();
+
+            return new EasyQueryCollection(results);
+        }
+
+        /// <summary>
+        /// Finds all types in a specific namespace across all loaded assemblies.
+        /// </summary>
+        /// <param name="namespaceName">The name of the namespace to search in.</param>
+        /// <returns>An EasyQueryCollection containing the results.</returns>
+        /// <exception cref="ArgumentException">Thrown if the namespace name is null or empty.</exception>
+        public static EasyQueryCollection WithAllTypesInNamespace(string namespaceName)
+        {
+            if (string.IsNullOrWhiteSpace(namespaceName))
+            {
+                throw new ArgumentException("Namespace name cannot be null or empty.", nameof(namespaceName));
+            }
+
+            var results = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                    from t in assembly.GetTypes()
+                    where t.Namespace != null && t.Namespace.Equals(namespaceName, StringComparison.OrdinalIgnoreCase)
+                    select new EasyQueryResult
+                    {
+                        Name = t.Name,
+                        FullName = t.FullName,
+                        Type = t,
+                        Namespace = t.Namespace
+                    })
+                .ToList();
+
+            if (!results.Any())
+            {
+                throw new ArgumentException($"No types found in namespace '{namespaceName}'.");
+            }
+
+            return new EasyQueryCollection(results);
+        }
+
+        /// <summary>
+        /// Creates an EasyQueryCollection with a single EasyQueryResult for a specified type.
+        /// </summary>
+        /// <typeparam name="T">The type to create an EasyQueryResult for.</typeparam>
+        /// <returns>An EasyQueryCollection containing the EasyQueryResult for the specified type.</returns>
+        public static EasyQueryCollection WithType<T>()
+        {
+            var type = typeof(T);
+            var result = new EasyQueryResult
+            {
+                Name = type.Name,
+                FullName = type.FullName,
+                Type = type,
+                Namespace = type.Namespace
+            };
+
+            return new EasyQueryCollection(new List<EasyQueryResult> { result });
+        }
+
+        /// <summary>
         /// Finds all members of a type that have a specific attribute.
         /// </summary>
         /// <param name="resultClass">The EasyQueryResult representing the type to search.</param>
