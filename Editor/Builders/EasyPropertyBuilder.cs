@@ -7,6 +7,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
+    /// <summary>
+    /// A builder class for creating property declarations.
+    /// </summary>
     public class EasyPropertyBuilder : EasyBasicBuilder<EasyPropertyBuilder>
     {
         private string name;
@@ -22,10 +25,19 @@ namespace easycodegenunity.Editor.Core.Builders
         private bool useExpressionBodiedGetter = false;
         private bool useExpressionBodiedSetter = false;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EasyPropertyBuilder"/> class.
+        /// </summary>
+        /// <param name="templateRoot">The template root.</param>
         public EasyPropertyBuilder(SyntaxNode templateRoot = null) : base(templateRoot)
         {
         }
 
+        /// <summary>
+        /// Sets the name of the property.
+        /// </summary>
+        /// <param name="name">The name of the property.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -37,6 +49,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the type of the property.
+        /// </summary>
+        /// <param name="type">The type of the property.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithType(string type)
         {
             if (string.IsNullOrWhiteSpace(type))
@@ -48,6 +65,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the modifiers of the property.
+        /// </summary>
+        /// <param name="modifiers">The modifiers of the property.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithModifiers(params SyntaxKind[] modifiers)
         {
             if (modifiers == null || modifiers.Length == 0)
@@ -59,18 +81,33 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the getter modifiers of the property.
+        /// </summary>
+        /// <param name="modifiers">The getter modifiers of the property.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithGetterModifiers(params SyntaxKind[] modifiers)
         {
             this.getterModifiers = modifiers;
             return this;
         }
 
+        /// <summary>
+        /// Sets the setter modifiers of the property.
+        /// </summary>
+        /// <param name="modifiers">The setter modifiers of the property.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithSetterModifiers(params SyntaxKind[] modifiers)
         {
             this.setterModifiers = modifiers;
             return this;
         }
 
+        /// <summary>
+        /// Sets the getter body of the property.
+        /// </summary>
+        /// <param name="statements">The getter statements of the property.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithGetterBody(params string[] statements)
         {
             if (statements == null || statements.Length == 0)
@@ -83,6 +120,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the setter body of the property.
+        /// </summary>
+        /// <param name="statements">The setter statements of the property.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithSetterBody(params string[] statements)
         {
             if (statements == null || statements.Length == 0)
@@ -95,6 +137,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the expression bodied getter of the property.
+        /// </summary>
+        /// <param name="expression">The expression for the getter.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithExpressionBodiedGetter(string expression)
         {
             if (string.IsNullOrWhiteSpace(expression))
@@ -109,6 +156,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the expression bodied setter of the property.
+        /// </summary>
+        /// <param name="expression">The expression for the setter.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithExpressionBodiedSetter(string expression)
         {
             if (string.IsNullOrWhiteSpace(expression))
@@ -123,6 +175,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the backing field of the property.
+        /// </summary>
+        /// <param name="fieldName">The name of the backing field.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithBackingField(string fieldName)
         {
             if (string.IsNullOrWhiteSpace(fieldName))
@@ -134,6 +191,10 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the property to be an auto property.
+        /// </summary>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithAutoProperty()
         {
             getterStatements = null;
@@ -141,6 +202,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the getter from template.
+        /// </summary>
+        /// <param name="propertyNameInTemplate">The property name in template.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithGetterFromTemplate(string propertyNameInTemplate)
         {
             if (string.IsNullOrWhiteSpace(propertyNameInTemplate))
@@ -191,6 +257,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the setter from template.
+        /// </summary>
+        /// <param name="propertyNameInTemplate">The property name in template.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithSetterFromTemplate(string propertyNameInTemplate)
         {
             if (string.IsNullOrWhiteSpace(propertyNameInTemplate))
@@ -241,6 +312,12 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Replaces text in the getter body.
+        /// </summary>
+        /// <param name="searchText">The text to search for.</param>
+        /// <param name="replaceText">The text to replace with.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder ReplaceInGetterBody(string searchText, string replaceText)
         {
             if (getterStatements == null || getterStatements.Length == 0)
@@ -256,6 +333,12 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Replaces text in the setter body.
+        /// </summary>
+        /// <param name="searchText">The text to search for.</param>
+        /// <param name="replaceText">The text to replace with.</param>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder ReplaceInSetterBody(string searchText, string replaceText)
         {
             if (setterStatements == null || setterStatements.Length == 0)
@@ -271,18 +354,30 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Removes the getter from the property.
+        /// </summary>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithoutGetter()
         {
             hasGetter = false;
             return this;
         }
 
+        /// <summary>
+        /// Removes the setter from the property.
+        /// </summary>
+        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
         public EasyPropertyBuilder WithoutSetter()
         {
             hasSetter = false;
             return this;
         }
 
+        /// <summary>
+        /// Builds the property declaration syntax.
+        /// </summary>
+        /// <returns>The created property declaration syntax.</returns>
         protected override MemberDeclarationSyntax BuildDeclarationSyntax()
         {
             ValidateRequiredProperties();

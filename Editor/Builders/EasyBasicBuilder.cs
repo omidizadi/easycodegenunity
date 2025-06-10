@@ -7,6 +7,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
+    /// <summary>
+    /// An abstract base class for builders that create syntax nodes.
+    /// </summary>
+    /// <typeparam name="TBuilder">The type of the builder, used for chaining.</typeparam>
     public abstract class EasyBasicBuilder<TBuilder> where TBuilder : EasyBasicBuilder<TBuilder>
     {
         protected SyntaxNode templateRoot;
@@ -15,33 +19,61 @@ namespace easycodegenunity.Editor.Core.Builders
 
         private List<AttributeListSyntax> attributeLists = new List<AttributeListSyntax>();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EasyBasicBuilder{TBuilder}"/> class.
+        /// </summary>
         protected EasyBasicBuilder()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EasyBasicBuilder{TBuilder}"/> class with a template root.
+        /// </summary>
+        /// <param name="templateRoot">The template root.</param>
         protected EasyBasicBuilder(SyntaxNode templateRoot)
         {
             this.templateRoot = templateRoot;
         }
 
+        /// <summary>
+        /// Adds a single-line comment to the generated code.
+        /// </summary>
+        /// <param name="commentText">The comment text.</param>
+        /// <returns>The builder instance for chaining.</returns>
         public TBuilder WithSingleLineComment(string commentText)
         {
             comment = "// " + commentText;
             return (TBuilder)this;
         }
 
+        /// <summary>
+        /// Adds a multi-line comment to the generated code.
+        /// </summary>
+        /// <param name="commentText">The comment text.</param>
+        /// <returns>The builder instance for chaining.</returns>
         public TBuilder WithMultiLineComment(string commentText)
         {
             comment = "/* " + commentText + " */";
             return (TBuilder)this;
         }
 
+        /// <summary>
+        /// Adds a summary comment (XML documentation) to the generated code.
+        /// </summary>
+        /// <param name="commentText">The comment text.</param>
+        /// <returns>The builder instance for chaining.</returns>
         public TBuilder WithSummaryComment(string commentText)
         {
             comment = "/// <summary>\n/// " + commentText + "\n/// </summary>";
             return (TBuilder)this;
         }
 
+        /// <summary>
+        /// Adds a parameter comment (XML documentation) to the generated code.
+        /// </summary>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="description">The description of the parameter.</param>
+        /// <returns>The builder instance for chaining.</returns>
         public TBuilder WithParamComment(string paramName, string description)
         {
             if (comment == null)
@@ -56,6 +88,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return (TBuilder)this;
         }
 
+        /// <summary>
+        /// Adds a returns comment (XML documentation) to the generated code.
+        /// </summary>
+        /// <param name="description">The description of the return value.</param>
+        /// <returns>The builder instance for chaining.</returns>
         public TBuilder WithReturnsComment(string description)
         {
             if (comment == null)
@@ -70,6 +107,13 @@ namespace easycodegenunity.Editor.Core.Builders
             return (TBuilder)this;
         }
 
+        /// <summary>
+        /// Replaces text in a parameter comment (XML documentation).
+        /// </summary>
+        /// <param name="paramName">The name of the parameter.</param>
+        /// <param name="oldValue">The old text to replace.</param>
+        /// <param name="newValue">The new text to replace with.</param>
+        /// <returns>The builder instance for chaining.</returns>
         public TBuilder ReplaceParamCommentText(string paramName, string oldValue, string newValue)
         {
             if (comment == null)
@@ -99,6 +143,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return (TBuilder)this;
         }
 
+        /// <summary>
+        /// Extracts a comment from a template member and applies it to the generated code.
+        /// </summary>
+        /// <param name="memberName">The name of the member in the template.</param>
+        /// <returns>The builder instance for chaining.</returns>
         public TBuilder WithCommentFromTemplate(string memberName)
         {
             if (string.IsNullOrEmpty(memberName))
@@ -110,6 +159,12 @@ namespace easycodegenunity.Editor.Core.Builders
             return (TBuilder)this;
         }
 
+        /// <summary>
+        /// Replaces text in the comment.
+        /// </summary>
+        /// <param name="oldValue">The old text to replace.</param>
+        /// <param name="newValue">The new text to replace with.</param>
+        /// <returns>The builder instance for chaining.</returns>
         public TBuilder ReplaceInComment(string oldValue, string newValue)
         {
             if (comment == null)
@@ -126,6 +181,12 @@ namespace easycodegenunity.Editor.Core.Builders
             return (TBuilder)this;
         }
 
+        /// <summary>
+        /// Adds an attribute to the generated code.
+        /// </summary>
+        /// <param name="attributeName">The name of the attribute.</param>
+        /// <param name="parameters">The parameters of the attribute (optional).</param>
+        /// <returns>The builder instance for chaining.</returns>
         public TBuilder WithAttribute(string attributeName, string parameters = null)
         {
             if (string.IsNullOrWhiteSpace(attributeName))
@@ -148,6 +209,10 @@ namespace easycodegenunity.Editor.Core.Builders
             return (TBuilder)this;
         }
 
+        /// <summary>
+        /// Builds the syntax node.
+        /// </summary>
+        /// <returns>The built syntax node.</returns>
         public MemberDeclarationSyntax Build()
         {
             var memberDeclaration = BuildDeclarationSyntax();
@@ -174,8 +239,17 @@ namespace easycodegenunity.Editor.Core.Builders
             return memberDeclaration;
         }
 
+        /// <summary>
+        /// Builds the declaration syntax.
+        /// </summary>
+        /// <returns>The built member declaration syntax.</returns>
         protected abstract MemberDeclarationSyntax BuildDeclarationSyntax();
 
+        /// <summary>
+        /// Extracts a comment from a template member.
+        /// </summary>
+        /// <param name="memberName">The name of the member.</param>
+        /// <returns>The extracted comment.</returns>
         private string ExtractCommentFromTemplate(string memberName)
         {
             if (string.IsNullOrEmpty(memberName))
@@ -226,6 +300,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return hasComment ? commentBuilder.ToString().TrimEnd() : string.Empty;
         }
 
+        /// <summary>
+        /// Finds a named node in the template.
+        /// </summary>
+        /// <param name="name">The name of the node.</param>
+        /// <returns>The found syntax node.</returns>
         private SyntaxNode FindNamedNode(string name)
         {
             var typeDeclaration = templateRoot.DescendantNodes().OfType<BaseTypeDeclarationSyntax>()

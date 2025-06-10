@@ -6,6 +6,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
+    /// <summary>
+    /// A builder class for creating method declarations.
+    /// </summary>
     public class EasyMethodBuilder : EasyBasicBuilder<EasyMethodBuilder>
     {
         private string name;
@@ -16,10 +19,19 @@ namespace easycodegenunity.Editor.Core.Builders
         private bool useExpressionBody = false;
         private string expressionBody;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EasyMethodBuilder"/> class.
+        /// </summary>
+        /// <param name="templateRoot">The template root.</param>
         public EasyMethodBuilder(SyntaxNode templateRoot = null) : base(templateRoot)
         {
         }
 
+        /// <summary>
+        /// Sets the name of the method.
+        /// </summary>
+        /// <param name="name">The name of the method.</param>
+        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
         public EasyMethodBuilder WithName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -31,6 +43,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the return type of the method.
+        /// </summary>
+        /// <param name="type">The return type of the method.</param>
+        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
         public EasyMethodBuilder WithReturnType(string type)
         {
             if (string.IsNullOrWhiteSpace(type))
@@ -42,6 +59,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the body of the method.
+        /// </summary>
+        /// <param name="bodyStatements">The body statements of the method.</param>
+        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
         public EasyMethodBuilder WithBody(params string[] bodyStatements)
         {
             if (bodyStatements == null || bodyStatements.Length == 0)
@@ -55,6 +77,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Adds a line to the method body.
+        /// </summary>
+        /// <param name="statement">The statement to add.</param>
+        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
         public EasyMethodBuilder WithBodyLine(string statement)
         {
             if (string.IsNullOrWhiteSpace(statement))
@@ -79,11 +106,21 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the body of the method.
+        /// </summary>
+        /// <param name="bodyStatements">The body statements of the method.</param>
+        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
         public EasyMethodBuilder WithBodyLines(params string[] bodyStatements)
         {
             return WithBody(bodyStatements);
         }
 
+        /// <summary>
+        /// Sets the expression body of the method.
+        /// </summary>
+        /// <param name="expression">The expression body of the method.</param>
+        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
         public EasyMethodBuilder WithExpressionBody(string expression)
         {
             if (string.IsNullOrWhiteSpace(expression))
@@ -99,6 +136,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the parameters of the method.
+        /// </summary>
+        /// <param name="parameters">The parameters of the method.</param>
+        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
         public EasyMethodBuilder WithParameters(params (string, string)[] parameters)
         {
             if (parameters == null || parameters.Length == 0)
@@ -110,6 +152,12 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Adds a parameter to the method.
+        /// </summary>
+        /// <param name="type">The type of the parameter.</param>
+        /// <param name="name">The name of the parameter.</param>
+        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
         public EasyMethodBuilder WithParameter(string type, string name)
         {
             if (string.IsNullOrWhiteSpace(type))
@@ -137,6 +185,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the modifiers of the method.
+        /// </summary>
+        /// <param name="modifiers">The modifiers of the method.</param>
+        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
         public EasyMethodBuilder WithModifiers(params SyntaxKind[] modifiers)
         {
             if (modifiers == null || modifiers.Length == 0)
@@ -148,6 +201,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the body from template.
+        /// </summary>
+        /// <param name="methodNameInTemplate">The method name in template.</param>
+        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
         public EasyMethodBuilder WithBodyFromTemplate(string methodNameInTemplate)
         {
             if (string.IsNullOrWhiteSpace(methodNameInTemplate))
@@ -200,6 +258,12 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Replaces text in the method body.
+        /// </summary>
+        /// <param name="searchText">The text to search for.</param>
+        /// <param name="replaceText">The text to replace with.</param>
+        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
         public EasyMethodBuilder ReplaceInBody(string searchText, string replaceText)
         {
             if (string.IsNullOrWhiteSpace(searchText))
@@ -234,6 +298,10 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Builds the method declaration syntax.
+        /// </summary>
+        /// <returns>The created method declaration syntax.</returns>
         protected override MemberDeclarationSyntax BuildDeclarationSyntax()
         {
             if (string.IsNullOrWhiteSpace(returnType))

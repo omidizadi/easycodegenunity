@@ -6,7 +6,7 @@ namespace com.omidizadi.EasyCodeGen
     [CreateAssetMenu(fileName = "EasyCodeGenSettings", menuName = "Easy Code Gen/Settings")]
     public class EasyCodeGenSettings : ScriptableObject
     {
-        private readonly List<string> _includedAssemblies = new List<string>();
+        [SerializeField] private List<string> includedAssemblies;
 
         private static EasyCodeGenSettings _instance;
 
@@ -25,6 +25,7 @@ namespace com.omidizadi.EasyCodeGen
                         {
                             UnityEditor.AssetDatabase.CreateFolder("Assets", "Resources");
                         }
+
                         UnityEditor.AssetDatabase.CreateAsset(_instance, "Assets/Resources/EasyCodeGenSettings.asset");
                         UnityEditor.AssetDatabase.SaveAssets();
 #endif
@@ -37,14 +38,14 @@ namespace com.omidizadi.EasyCodeGen
 
         public bool IsAssemblyIncluded(string assemblyName)
         {
-            return _includedAssemblies.Contains(assemblyName);
+            return includedAssemblies.Contains(assemblyName);
         }
 
         public void AddAssembly(string assemblyName)
         {
-            if (!_includedAssemblies.Contains(assemblyName))
+            if (!includedAssemblies.Contains(assemblyName))
             {
-                _includedAssemblies.Add(assemblyName);
+                includedAssemblies.Add(assemblyName);
 #if UNITY_EDITOR
                 UnityEditor.EditorUtility.SetDirty(this);
 #endif
@@ -53,9 +54,9 @@ namespace com.omidizadi.EasyCodeGen
 
         public void RemoveAssembly(string assemblyName)
         {
-            if (_includedAssemblies.Contains(assemblyName))
+            if (includedAssemblies.Contains(assemblyName))
             {
-                _includedAssemblies.Remove(assemblyName);
+                includedAssemblies.Remove(assemblyName);
 #if UNITY_EDITOR
                 UnityEditor.EditorUtility.SetDirty(this);
 #endif
@@ -64,7 +65,7 @@ namespace com.omidizadi.EasyCodeGen
 
         public void ClearAssemblies()
         {
-            _includedAssemblies.Clear();
+            includedAssemblies.Clear();
 #if UNITY_EDITOR
             UnityEditor.EditorUtility.SetDirty(this);
 #endif

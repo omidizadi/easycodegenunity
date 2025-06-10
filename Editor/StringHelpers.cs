@@ -1,5 +1,8 @@
 namespace easycodegenunity.Editor.Core
 {
+    /// <summary>
+    /// Some string helper methods to modify strings in a more convenient way.
+    /// </summary>
     public static class StringHelpers
     {
         public static string ToCamelCase(this string str)

@@ -9,13 +9,25 @@ using UnityEngine;
 
 namespace easycodegenunity.Editor.Core
 {
+    /// <summary>
+    /// A builder class for generating C# code.
+    /// </summary>
     public class EasyCodeBuilder
     {
         private SyntaxNode templateRoot;
         private SyntaxNode root;
         private string outputPath;
+        /// <summary>
+        /// Gets the generated code.
+        /// </summary>
+        /// <value>The generated code.</value>
         public string GeneratedCode { get; private set; }
 
+        /// <summary>
+        /// Sets the template to use for code generation.
+        /// </summary>
+        /// <typeparam name="T">The type of the template.</typeparam>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
         public EasyCodeBuilder WithTemplate<T>()
         {
             var template = typeof(T);
@@ -27,6 +39,13 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Adds a using statement to the generated code.
+        /// </summary>
+        /// <param name="usingStatement">The using statement to add.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
+        /// <exception cref="ArgumentException">Thrown when the using statement is null or empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the root node is not a CompilationUnitSyntax.</exception>
         public EasyCodeBuilder AddUsingStatement(string usingStatement)
         {
             if (string.IsNullOrWhiteSpace(usingStatement))
@@ -47,6 +66,13 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Adds a namespace to the generated code.
+        /// </summary>
+        /// <param name="namespaceName">The name of the namespace to add.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
+        /// <exception cref="ArgumentException">Thrown when the namespace name is null or empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the root node is not a CompilationUnitSyntax.</exception>
         public EasyCodeBuilder AddNamespace(string namespaceName)
         {
             if (string.IsNullOrWhiteSpace(namespaceName))
@@ -67,6 +93,11 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Adds a class to the generated code.
+        /// </summary>
+        /// <param name="typeBuilderInstructions">The instructions for building the class.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
         public EasyCodeBuilder AddClass(Func<EasyClassBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
         {
             var classBuilder = new EasyClassBuilder(templateRoot);
@@ -75,6 +106,11 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Adds a struct to the generated code.
+        /// </summary>
+        /// <param name="typeBuilderInstructions">The instructions for building the struct.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
         public EasyCodeBuilder AddStruct(Func<EasyTypeBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
         {
             var structBuilder = new EasyStructBuilder(templateRoot);
@@ -83,6 +119,11 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Adds a constructor to the generated code.
+        /// </summary>
+        /// <param name="typeBuilderInstructions">The instructions for building the constructor.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
         public EasyCodeBuilder AddConstructor(Func<EasyConstructorBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
         {
             var constructorBuilder = new EasyConstructorBuilder(templateRoot);
@@ -91,6 +132,11 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Adds an interface to the generated code.
+        /// </summary>
+        /// <param name="typeBuilderInstructions">The instructions for building the interface.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
         public EasyCodeBuilder AddInterface(Func<EasyInterfaceBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
         {
             var interfaceBuilder = new EasyInterfaceBuilder();
@@ -99,6 +145,11 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Adds an enum to the generated code.
+        /// </summary>
+        /// <param name="enumBuilderInstructions">The instructions for building the enum.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
         public EasyCodeBuilder AddEnum(Func<EasyEnumBuilder, MemberDeclarationSyntax> enumBuilderInstructions)
         {
             var enumBuilder = new EasyEnumBuilder();
@@ -107,6 +158,11 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Adds a field to the generated code.
+        /// </summary>
+        /// <param name="fieldBuilderInstructions">The instructions for building the field.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
         public EasyCodeBuilder AddField(Func<EasyFieldBuilder, MemberDeclarationSyntax> fieldBuilderInstructions)
         {
             var fieldBuilder = new EasyFieldBuilder();
@@ -115,6 +171,11 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Adds a method to the generated code.
+        /// </summary>
+        /// <param name="methodBuilderInstructions">The instructions for building the method.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
         public EasyCodeBuilder AddMethod(Func<EasyMethodBuilder, MemberDeclarationSyntax> methodBuilderInstructions)
         {
             var methodBuilder = new EasyMethodBuilder(templateRoot);
@@ -123,6 +184,11 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Adds a property to the generated code.
+        /// </summary>
+        /// <param name="propertyBuilderInstructions">The instructions for building the property.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
         public EasyCodeBuilder AddProperty(
             Func<EasyPropertyBuilder, MemberDeclarationSyntax> propertyBuilderInstructions)
         {
@@ -132,6 +198,12 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Sets the directory where the generated code will be saved.
+        /// </summary>
+        /// <param name="path">The output directory path.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the output path is null.</exception>
         public EasyCodeBuilder SetDirectory(string path)
         {
             outputPath = path ?? throw new ArgumentNullException(nameof(path), "Output path cannot be null.");
@@ -144,6 +216,13 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Sets the file name for the generated code.
+        /// </summary>
+        /// <param name="fileName">The name of the file.</param>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
+        /// <exception cref="ArgumentException">Thrown when the file name is null or empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the output path is not set.</exception>
         public EasyCodeBuilder SetFileName(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName))
@@ -163,6 +242,13 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Generates the code.
+        /// </summary>
+        /// <returns>The EasyCodeBuilder instance for chaining.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the root node is not set or the output path is not set.
+        /// </exception>
         public EasyCodeBuilder Generate()
         {
             // This method would typically generate the final code from the root syntax node
@@ -184,11 +270,17 @@ namespace easycodegenunity.Editor.Core
             return this;
         }
 
+        /// <summary>
+        /// Saves the generated code to a file.
+        /// </summary>
         public void Save()
         {
             System.IO.File.WriteAllText(outputPath, GeneratedCode);
         }
 
+        /// <summary>
+        /// Cleans up the existing file (if it exists) and saves the generated code to a file.
+        /// </summary>
         public void CleanUpAndSave()
         {
             if (System.IO.File.Exists(outputPath))
@@ -199,6 +291,13 @@ namespace easycodegenunity.Editor.Core
             Save();
         }
 
+        /// <summary>
+        /// Adds a member to a type declaration.
+        /// </summary>
+        /// <param name="rootNode">The root syntax node.</param>
+        /// <param name="member">The member to add.</param>
+        /// <returns>The modified syntax node.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when no namespace or type is found to add the member to.</exception>
         private SyntaxNode AddMemberToType(SyntaxNode rootNode, MemberDeclarationSyntax member)
         {
             // Find the first namespace in the compilation unit

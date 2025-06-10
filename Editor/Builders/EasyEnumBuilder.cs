@@ -5,10 +5,18 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
+    /// <summary>
+    /// A builder class for creating enum declarations.
+    /// </summary>
     public class EasyEnumBuilder : EasyTypeBuilder
     {
         private readonly List<EnumMemberDeclarationSyntax> members = new List<EnumMemberDeclarationSyntax>();
 
+        /// <summary>
+        /// Adds a member to the enum.
+        /// </summary>
+        /// <param name="name">The name of the enum member.</param>
+        /// <returns>The EasyEnumBuilder instance for chaining.</returns>
         public EasyEnumBuilder AddMember(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -21,6 +29,12 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Adds a member with a specific value to the enum.
+        /// </summary>
+        /// <param name="name">The name of the enum member.</param>
+        /// <param name="value">The value of the enum member.</param>
+        /// <returns>The EasyEnumBuilder instance for chaining.</returns>
         public EasyEnumBuilder AddMember(string name, int value)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -42,6 +56,10 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Creates the enum declaration syntax.
+        /// </summary>
+        /// <returns>The created enum declaration syntax.</returns>
         protected override BaseTypeDeclarationSyntax CreateTypeDeclaration()
         {
             var enumDeclaration = SyntaxFactory.EnumDeclaration(name);

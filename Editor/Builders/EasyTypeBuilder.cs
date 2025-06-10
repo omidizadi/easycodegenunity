@@ -6,6 +6,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
+    /// <summary>
+    /// An abstract builder class for creating type declarations (class, struct, interface).
+    /// </summary>
     public abstract class EasyTypeBuilder : EasyBasicBuilder<EasyTypeBuilder>
     {
         private string baseType;
@@ -16,10 +19,19 @@ namespace easycodegenunity.Editor.Core.Builders
         private EasyConstructorBuilder constructorBuilder;
         protected string name { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EasyTypeBuilder"/> class.
+        /// </summary>
+        /// <param name="templateRoot">The template root.</param>
         protected EasyTypeBuilder(SyntaxNode templateRoot = null) : base(templateRoot)
         {
         }
 
+        /// <summary>
+        /// Sets the name of the type.
+        /// </summary>
+        /// <param name="name">The name of the type.</param>
+        /// <returns>The EasyTypeBuilder instance for chaining.</returns>
         public EasyTypeBuilder WithName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -31,6 +43,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the base type of the type.
+        /// </summary>
+        /// <param name="type">The base type of the type.</param>
+        /// <returns>The EasyTypeBuilder instance for chaining.</returns>
         public EasyTypeBuilder WithBaseType(string type)
         {
             if (string.IsNullOrWhiteSpace(type))
@@ -43,6 +60,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the interfaces of the type.
+        /// </summary>
+        /// <param name="interfaces">The interfaces of the type.</param>
+        /// <returns>The EasyTypeBuilder instance for chaining.</returns>
         public EasyTypeBuilder WithInterfaces(params string[] interfaces)
         {
             if (interfaces == null || interfaces.Length == 0)
@@ -54,6 +76,11 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Sets the modifiers of the type.
+        /// </summary>
+        /// <param name="modifiers">The modifiers of the type.</param>
+        /// <returns>The EasyTypeBuilder instance for chaining.</returns>
         public EasyTypeBuilder WithModifiers(params SyntaxKind[] modifiers)
         {
             if (modifiers == null || modifiers.Length == 0)
@@ -65,6 +92,10 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
+        /// <summary>
+        /// Builds the type declaration syntax.
+        /// </summary>
+        /// <returns>The created type declaration syntax.</returns>
         protected override MemberDeclarationSyntax BuildDeclarationSyntax()
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -111,6 +142,10 @@ namespace easycodegenunity.Editor.Core.Builders
             return typeDeclaration;
         }
 
+        /// <summary>
+        /// Creates the type declaration syntax.
+        /// </summary>
+        /// <returns>The created type declaration syntax.</returns>
         protected abstract BaseTypeDeclarationSyntax CreateTypeDeclaration();
 
         protected bool HasConstructor()
