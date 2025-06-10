@@ -202,7 +202,17 @@ This package includes optional samples demonstrating how to use Easy Code Gen:
 
 ## 📖 Documentation
 
-For more detailed information on how to use Easy Code Gen, please refer to the [documentation](#).
+(Coming soon!) For now, refer to the samples!
+
+## 🗺️ Roadmap
+
+- [ ] Add more built-in templates for common game systems
+- [ ] Improve code analysis capabilities
+- [ ] Add more query options for existing code
+- [ ] Enhance performance for large codebases
+- [ ] Support for more complex code generation scenarios
+- [ ] Improve documentation and examples
+- [ ] Add more unit tests for code generation logic
 
 ## 👥 Contributing
 
