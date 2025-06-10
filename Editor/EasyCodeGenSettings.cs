@@ -6,7 +6,7 @@ namespace com.omidizadi.EasyCodeGen
     [CreateAssetMenu(fileName = "EasyCodeGenSettings", menuName = "Easy Code Gen/Settings")]
     public class EasyCodeGenSettings : ScriptableObject
     {
-        [SerializeField] private List<string> includedAssemblies;
+        [SerializeField] private List<string> includedAssemblies = new();
 
         private static EasyCodeGenSettings _instance;
 
