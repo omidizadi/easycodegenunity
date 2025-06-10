@@ -32,7 +32,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithBody(@"Debug.Log(""DoSomethingB!"");")
                     .WithModifiers(SyntaxKind.PublicKeyword)
                     .Build())
-                .SetDirectory("Assets/easycodegenunity/Editor/Samples/BasicExamples/Generated")
+                .SetDirectory("Assets/Samples/BasicExamples/Generated")
                 .SetFileName("SampleInterfaces.cs")
                 .Generate()
                 .Save();

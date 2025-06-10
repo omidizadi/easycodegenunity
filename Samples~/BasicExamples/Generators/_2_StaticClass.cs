@@ -23,7 +23,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithBody("Console.WriteLine(\"Hello from UtilityClass!\");")
                     .WithModifiers(SyntaxKind.PublicKeyword, SyntaxKind.StaticKeyword)
                     .Build())
-                .SetDirectory("Assets/easycodegenunity/Editor/Samples/BasicExamples/Generated")
+                .SetDirectory("Assets/Samples/BasicExamples/Generated")
                 .SetFileName("UtilityClass.cs")
                 .Generate()
                 .Save();

@@ -69,7 +69,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                         "Console.WriteLine(\"Initialized\");"
                     )
                     .Build())
-                .SetDirectory("Assets/easycodegenunity/Samples/BasicExamples/Generated")
+                .SetDirectory("Assets/Samples/BasicExamples/Generated")
                 .SetFileName("AttributeExampleClass.cs")
                 .Generate()
                 .Save();

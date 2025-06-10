@@ -102,7 +102,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     )
                     .Build())
                 
-                .SetDirectory("Assets/easycodegenunity/Samples/BasicExamples/Generated")
+                .SetDirectory("Assets/Samples/BasicExamples/Generated")
                 .SetFileName("AdvancedPropertySample.cs")
                 .Generate()
                 .Save();

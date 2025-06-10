@@ -32,7 +32,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithType("string[]")
                     .WithModifiers(SyntaxKind.PrivateKeyword)
                     .Build())
-                .SetDirectory("Assets/easycodegenunity/Editor/Samples/BasicExamples/Generated")
+                .SetDirectory("Assets/Samples/BasicExamples/Generated")
                 .SetFileName("SampleFields.cs")
                 .Generate()
                 .Save();

@@ -36,7 +36,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithParameters(("string", "name"), ("int", "age"))
                     .WithModifiers(SyntaxKind.PublicKeyword)
                     .Build())
-                .SetDirectory("Assets/easycodegenunity/Editor/Samples/BasicExamples/Generated")
+                .SetDirectory("Assets/Samples/BasicExamples/Generated")
                 .SetFileName("SampleClassWithConstructor.cs")
                 .Generate()
                 .Save();

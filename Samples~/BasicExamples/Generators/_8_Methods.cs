@@ -24,7 +24,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithModifiers(SyntaxKind.PublicKeyword)
                     .WithBody("Console.WriteLine(\"This is a sample method\");")
                     .Build())
-                .SetDirectory("Assets/easycodegenunity/Samples/BasicExamples/Generated")
+                .SetDirectory("Assets/Samples/BasicExamples/Generated")
                 .SetFileName("SampleMethod.cs")
                 .Generate()
                 .Save();

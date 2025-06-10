@@ -96,7 +96,7 @@ Last generated: " + System.DateTime.Now.ToString("yyyy-MM-dd"))
                     .ReplaceParamCommentText("items", "{ITEM_TYPE}", "strings")
                     .WithBodyLine("// Implementation goes here")
                     .Build())
-                .SetDirectory("Assets/easycodegenunity/Samples/BasicExamples/Generated")
+                .SetDirectory("Assets/Samples/BasicExamples/Generated")
                 .SetFileName("CommentedClass.cs")
                 .Generate()
                 .Save();

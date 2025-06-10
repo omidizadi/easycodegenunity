@@ -22,7 +22,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithModifiers(SyntaxKind.PublicKeyword)
                     .WithoutSetter()
                     .Build())
-                .SetDirectory("Assets/easycodegenunity/Samples/BasicExamples/Generated")
+                .SetDirectory("Assets/Samples/BasicExamples/Generated")
                 .SetFileName("SampleProperty.cs")
                 .Generate()
                 .Save();

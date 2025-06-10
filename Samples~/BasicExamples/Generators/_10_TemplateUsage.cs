@@ -81,7 +81,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithBodyFromTemplate(nameof(BasicTemplate.GetGreeting)) // Use method body from template
                     .ReplaceInBody("_NAME_PLACEHOLDER_", "name") // Replace placeholder with our field name
                     .Build())
-                .SetDirectory("Assets/easycodegenunity/Samples/BasicExamples/Generated")
+                .SetDirectory("Assets/Samples/BasicExamples/Generated")
                 .SetFileName("PersonFromTemplate.cs")
                 .Generate()
                 .Save();

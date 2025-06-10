@@ -116,7 +116,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                         return result;")
                     .Build())
                 
-                .SetDirectory("Assets/easycodegenunity/Samples/BasicExamples/Generated")
+                .SetDirectory("Assets/Samples/BasicExamples/Generated")
                 .SetFileName("AdvancedMethodsSample.cs")
                 .Generate()
                 .CleanUpAndSave();

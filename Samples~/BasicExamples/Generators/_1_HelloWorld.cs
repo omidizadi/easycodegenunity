@@ -25,7 +25,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithBody("Debug.Log(\"Hello, World!\");") // Body of the method that logs "Hello, World!" to the console
                     .WithModifiers(SyntaxKind.PrivateKeyword) // Making the method private, as it is a Unity lifecycle method
                     .Build()) // Finalizing the method definition
-                .SetDirectory("Assets/easycodegenunity/Editor/Samples/BasicExamples/Generated") // Setting the directory where the generated file will be saved
+                .SetDirectory("Assets/Samples/BasicExamples/Generated") // Setting the directory where the generated file will be saved
                 .SetFileName("HelloWorldSample.cs") // Setting the name of the generated file
                 .Generate() // Generating the code based on the defined structure
                 .Save();
