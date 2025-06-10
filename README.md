@@ -174,6 +174,8 @@ To run code generators, use the EasyCodeGen Editor Window:
 2.  Select the generators you want to run.
 3.  Click the "Generate Code" button.
 
+<img width="507" alt="EasyCodeGen Window" src="https://github.com/user-attachments/assets/81b277d3-f47b-449c-8682-6ae23cf4fa48" />
+
 ## 🌟 Where Code Generation Shines
 
 ### Game Systems Scaling 📈
