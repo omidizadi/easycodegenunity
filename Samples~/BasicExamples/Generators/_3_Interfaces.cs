@@ -6,7 +6,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
     /// <summary>
     /// This sample demonstrates how to create a class that inherits from MonoBehaviour and implements multiple interfaces using EasyCodeGenerator.
     /// </summary>
-    public class _3_SampleInterfaces : IEasyCodeGenerator
+    public class _3_Interfaces : IEasyCodeGenerator
     {
         public void Execute()
         {

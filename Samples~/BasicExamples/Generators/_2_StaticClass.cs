@@ -6,7 +6,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
     /// <summary>
     /// This sample demonstrates how to create a static class with a method using EasyCodeGenerator.
     /// </summary>
-    public class _2_SampleStaticClass : IEasyCodeGenerator
+    public class _2_StaticClass : IEasyCodeGenerator
     {
         public void Execute()
         {

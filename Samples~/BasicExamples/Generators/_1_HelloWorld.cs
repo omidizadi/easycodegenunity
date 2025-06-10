@@ -7,7 +7,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
     /// In this sample, we create a simple Unity MonoBehaviour script that logs "Hello, World!" to the console.
     /// You will learn how to generate a simple Unity script using the EasyCodeBuilder.
     /// </summary>
-    public class _1_SampleHelloWorld : IEasyCodeGenerator
+    public class _1_HelloWorld : IEasyCodeGenerator
     {
         public void Execute()
         {

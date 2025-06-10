@@ -6,7 +6,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
     /// <summary>
     /// This sample shows how to create a class with a constructor using EasyCodeGenerator.
     /// </summary>
-    public class _5_SampleConstructor : IEasyCodeGenerator
+    public class _5_Constructor : IEasyCodeGenerator
     {
         public void Execute()
         {

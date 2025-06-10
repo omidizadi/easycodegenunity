@@ -14,10 +14,13 @@ namespace easycodegenunity.Editor.Core.Builders
         private SyntaxKind[] modifiers;
         private SyntaxKind[] getterModifiers;
         private SyntaxKind[] setterModifiers;
-        private string getterBody;
-        private string setterBody;
+        private string[] getterStatements;
+        private string[] setterStatements;
         private bool hasGetter = true;
         private bool hasSetter = true;
+        private string backingFieldName;
+        private bool useExpressionBodiedGetter = false;
+        private bool useExpressionBodiedSetter = false;
 
         public EasyPropertyBuilder(SyntaxNode templateRoot = null) : base(templateRoot)
         {
@@ -68,25 +71,73 @@ namespace easycodegenunity.Editor.Core.Builders
             return this;
         }
 
-        public EasyPropertyBuilder WithGetterBody(string body)
+        public EasyPropertyBuilder WithGetterBody(params string[] statements)
         {
-            if (string.IsNullOrWhiteSpace(body))
+            if (statements == null || statements.Length == 0)
             {
-                throw new ArgumentException("Getter body cannot be null or empty.", nameof(body));
+                throw new ArgumentException("Getter statements cannot be null or empty.", nameof(statements));
             }
 
-            this.getterBody = body;
+            getterStatements = statements;
+            useExpressionBodiedGetter = false;
             return this;
         }
 
-        public EasyPropertyBuilder WithSetterBody(string body)
+        public EasyPropertyBuilder WithSetterBody(params string[] statements)
         {
-            if (string.IsNullOrWhiteSpace(body))
+            if (statements == null || statements.Length == 0)
             {
-                throw new ArgumentException("Setter body cannot be null or empty.", nameof(body));
+                throw new ArgumentException("Setter statements cannot be null or empty.", nameof(statements));
             }
 
-            this.setterBody = body;
+            setterStatements = statements;
+            useExpressionBodiedSetter = false;
+            return this;
+        }
+
+        public EasyPropertyBuilder WithExpressionBodiedGetter(string expression)
+        {
+            if (string.IsNullOrWhiteSpace(expression))
+            {
+                throw new ArgumentException("Expression cannot be null or empty.", nameof(expression));
+            }
+
+            // Ensure we don't accidentally include a return statement in expression-bodied members
+            string cleanExpression = expression.Replace("return ", "").Replace(";", "").Trim();
+            getterStatements = new[] { cleanExpression };
+            useExpressionBodiedGetter = true;
+            return this;
+        }
+
+        public EasyPropertyBuilder WithExpressionBodiedSetter(string expression)
+        {
+            if (string.IsNullOrWhiteSpace(expression))
+            {
+                throw new ArgumentException("Expression cannot be null or empty.", nameof(expression));
+            }
+
+            // Remove semicolon if present
+            string cleanExpression = expression.Replace(";", "").Trim();
+            setterStatements = new[] { cleanExpression };
+            useExpressionBodiedSetter = true;
+            return this;
+        }
+
+        public EasyPropertyBuilder WithBackingField(string fieldName)
+        {
+            if (string.IsNullOrWhiteSpace(fieldName))
+            {
+                throw new ArgumentException("Backing field name cannot be null or empty.", nameof(fieldName));
+            }
+
+            backingFieldName = fieldName;
+            return this;
+        }
+
+        public EasyPropertyBuilder WithAutoProperty()
+        {
+            getterStatements = null;
+            setterStatements = null;
             return this;
         }
 
@@ -121,15 +172,20 @@ namespace easycodegenunity.Editor.Core.Builders
 
             if (getter.Body != null)
             {
-                getterBody = getter.Body.ToString().TrimStart('{').TrimEnd('}').Trim();
+                string body = getter.Body.ToString().TrimStart('{').TrimEnd('}').Trim();
+                getterStatements = new[] { body };
+                useExpressionBodiedGetter = false;
             }
             else if (getter.ExpressionBody != null)
             {
-                getterBody = $"return {getter.ExpressionBody.Expression.ToString()};";
+                string expression = getter.ExpressionBody.Expression.ToString();
+                getterStatements = new[] { expression };
+                useExpressionBodiedGetter = true;
             }
             else
             {
-                getterBody = string.Empty;
+                getterStatements = null;
+                useExpressionBodiedGetter = false;
             }
 
             return this;
@@ -166,15 +222,20 @@ namespace easycodegenunity.Editor.Core.Builders
 
             if (setter.Body != null)
             {
-                setterBody = setter.Body.ToString().TrimStart('{').TrimEnd('}').Trim();
+                string body = setter.Body.ToString().TrimStart('{').TrimEnd('}').Trim();
+                setterStatements = new[] { body };
+                useExpressionBodiedSetter = false;
             }
             else if (setter.ExpressionBody != null)
             {
-                setterBody = $"{setter.ExpressionBody.Expression.ToString()};";
+                string expression = setter.ExpressionBody.Expression.ToString();
+                setterStatements = new[] { expression };
+                useExpressionBodiedSetter = true;
             }
             else
             {
-                setterBody = string.Empty;
+                setterStatements = null;
+                useExpressionBodiedSetter = false;
             }
 
             return this;
@@ -182,23 +243,31 @@ namespace easycodegenunity.Editor.Core.Builders
 
         public EasyPropertyBuilder ReplaceInGetterBody(string searchText, string replaceText)
         {
-            if (string.IsNullOrWhiteSpace(getterBody))
+            if (getterStatements == null || getterStatements.Length == 0)
             {
                 throw new InvalidOperationException("Getter body is not set. Please set a getter body first.");
             }
 
-            getterBody = getterBody.Replace(searchText, replaceText);
+            for (int i = 0; i < getterStatements.Length; i++)
+            {
+                getterStatements[i] = getterStatements[i].Replace(searchText, replaceText);
+            }
+            
             return this;
         }
 
         public EasyPropertyBuilder ReplaceInSetterBody(string searchText, string replaceText)
         {
-            if (string.IsNullOrWhiteSpace(setterBody))
+            if (setterStatements == null || setterStatements.Length == 0)
             {
                 throw new InvalidOperationException("Setter body is not set. Please set a setter body first.");
             }
 
-            setterBody = setterBody.Replace(searchText, replaceText);
+            for (int i = 0; i < setterStatements.Length; i++)
+            {
+                setterStatements[i] = setterStatements[i].Replace(searchText, replaceText);
+            }
+            
             return this;
         }
 
@@ -216,6 +285,32 @@ namespace easycodegenunity.Editor.Core.Builders
 
         protected override MemberDeclarationSyntax BuildDeclarationSyntax()
         {
+            ValidateRequiredProperties();
+            
+            // Create property declaration
+            var propertyDeclaration = SyntaxFactory.PropertyDeclaration(
+                SyntaxFactory.ParseTypeName(type),
+                SyntaxFactory.Identifier(name));
+
+            // Add modifiers to the property
+            propertyDeclaration = ApplyModifiers(propertyDeclaration);
+            
+            // Handle backing field default implementation
+            HandleBackingFieldDefaults();
+
+            // Handle different property types
+            if (IsAutoProperty())
+            {
+                return BuildAutoProperty(propertyDeclaration);
+            }
+            else
+            {
+                return BuildCustomProperty(propertyDeclaration);
+            }
+        }
+
+        private void ValidateRequiredProperties()
+        {
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new InvalidOperationException("Property name must be set before building.");
@@ -225,80 +320,160 @@ namespace easycodegenunity.Editor.Core.Builders
             {
                 throw new InvalidOperationException("Property type must be set before building.");
             }
+        }
 
-            var propertyDeclaration = SyntaxFactory.PropertyDeclaration(
-                SyntaxFactory.ParseTypeName(type),
-                SyntaxFactory.Identifier(name));
-
+        private PropertyDeclarationSyntax ApplyModifiers(PropertyDeclarationSyntax declaration)
+        {
             if (modifiers != null)
             {
                 foreach (var modifier in modifiers)
                 {
-                    propertyDeclaration = propertyDeclaration.AddModifiers(SyntaxFactory.Token(modifier));
+                    declaration = declaration.AddModifiers(SyntaxFactory.Token(modifier));
                 }
             }
+            
+            return declaration;
+        }
 
+        private void HandleBackingFieldDefaults()
+        {
+            // If we're using backing field and no explicit getter/setter statements are provided, create default implementations
+            if (!string.IsNullOrWhiteSpace(backingFieldName) && 
+                (getterStatements == null || getterStatements.Length == 0) && 
+                (setterStatements == null || setterStatements.Length == 0))
+            {
+                getterStatements = new[] { backingFieldName };
+                useExpressionBodiedGetter = true;
+                
+                setterStatements = new[] { $"{backingFieldName} = value" };
+                useExpressionBodiedSetter = true;
+            }
+        }
+
+        private bool IsAutoProperty()
+        {
+            return (getterStatements == null || getterStatements.Length == 0) && 
+                   (setterStatements == null || setterStatements.Length == 0) && 
+                   string.IsNullOrWhiteSpace(backingFieldName);
+        }
+
+        private PropertyDeclarationSyntax BuildAutoProperty(PropertyDeclarationSyntax declaration)
+        {
             List<AccessorDeclarationSyntax> accessors = new List<AccessorDeclarationSyntax>();
 
             if (hasGetter)
             {
-                var getAccessorDeclaration = SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration);
-
-                if (getterModifiers != null)
-                {
-                    foreach (var modifier in getterModifiers)
-                    {
-                        getAccessorDeclaration = getAccessorDeclaration.AddModifiers(SyntaxFactory.Token(modifier));
-                    }
-                }
-
-                if (!string.IsNullOrWhiteSpace(getterBody))
-                {
-                    getAccessorDeclaration =
-                        getAccessorDeclaration.WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(getterBody)));
-                }
-                else
-                {
-                    getAccessorDeclaration =
-                        getAccessorDeclaration.WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
-                }
-
-                accessors.Add(getAccessorDeclaration);
+                accessors.Add(CreateAutoAccessor(SyntaxKind.GetAccessorDeclaration, getterModifiers));
             }
 
             if (hasSetter)
             {
-                var setAccessorDeclaration = SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration);
+                accessors.Add(CreateAutoAccessor(SyntaxKind.SetAccessorDeclaration, setterModifiers));
+            }
 
-                if (setterModifiers != null)
+            var accessorList = SyntaxFactory.AccessorList(SyntaxFactory.List(accessors));
+            return declaration.WithAccessorList(accessorList);
+        }
+
+        private PropertyDeclarationSyntax BuildCustomProperty(PropertyDeclarationSyntax declaration)
+        {
+            List<AccessorDeclarationSyntax> customAccessors = new List<AccessorDeclarationSyntax>();
+
+            // Build getter
+            if (hasGetter)
+            {
+                customAccessors.Add(CreateCustomAccessor(
+                    SyntaxKind.GetAccessorDeclaration, 
+                    getterStatements, 
+                    useExpressionBodiedGetter,
+                    getterModifiers));
+            }
+
+            // Build setter
+            if (hasSetter)
+            {
+                customAccessors.Add(CreateCustomAccessor(
+                    SyntaxKind.SetAccessorDeclaration, 
+                    setterStatements, 
+                    useExpressionBodiedSetter,
+                    setterModifiers));
+            }
+
+            // Add accessors to the property
+            var customAccessorList = SyntaxFactory.AccessorList(SyntaxFactory.List(customAccessors));
+            return declaration.WithAccessorList(customAccessorList);
+        }
+
+        private AccessorDeclarationSyntax CreateAutoAccessor(SyntaxKind accessorKind, SyntaxKind[] modifiers)
+        {
+            var accessor = SyntaxFactory.AccessorDeclaration(accessorKind)
+                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+                
+            if (modifiers != null)
+            {
+                foreach (var modifier in modifiers)
                 {
-                    foreach (var modifier in setterModifiers)
-                    {
-                        setAccessorDeclaration = setAccessorDeclaration.AddModifiers(SyntaxFactory.Token(modifier));
-                    }
+                    accessor = accessor.AddModifiers(SyntaxFactory.Token(modifier));
                 }
+            }
+            
+            return accessor;
+        }
 
-                if (!string.IsNullOrWhiteSpace(setterBody))
+        private AccessorDeclarationSyntax CreateCustomAccessor(
+            SyntaxKind accessorKind, 
+            string[] statements, 
+            bool useExpressionBodied,
+            SyntaxKind[] modifiers)
+        {
+            AccessorDeclarationSyntax accessor;
+            
+            if (useExpressionBodied && statements != null && statements.Length == 1)
+            {
+                // Create expression-bodied accessor
+                accessor = SyntaxFactory.AccessorDeclaration(accessorKind)
+                    .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(SyntaxFactory.ParseExpression(statements[0])))
+                    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+            }
+            else
+            {
+                // Create block-bodied accessor
+                accessor = SyntaxFactory.AccessorDeclaration(accessorKind);
+                
+                if (statements != null && statements.Length > 0)
                 {
-                    setAccessorDeclaration =
-                        setAccessorDeclaration.WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(setterBody)));
+                    // If it's a single statement that might contain multiple lines (from a template),
+                    // we need to parse it as a statement
+                    if (statements.Length == 1)
+                    {
+                        accessor = accessor.WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(statements[0])));
+                    }
+                    else
+                    {
+                        // Create block with multiple statements
+                        var parsedStatements = statements
+                            .Select(stmt => SyntaxFactory.ParseStatement(stmt))
+                            .ToArray();
+                        
+                        accessor = accessor.WithBody(SyntaxFactory.Block(parsedStatements));
+                    }
                 }
                 else
                 {
-                    setAccessorDeclaration =
-                        setAccessorDeclaration.WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+                    accessor = accessor.WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
                 }
-
-                accessors.Add(setAccessorDeclaration);
             }
-
-            if (accessors.Count > 0)
+            
+            // Apply modifiers
+            if (modifiers != null)
             {
-                var accessorList = SyntaxFactory.AccessorList(SyntaxFactory.List(accessors));
-                propertyDeclaration = propertyDeclaration.WithAccessorList(accessorList);
+                foreach (var modifier in modifiers)
+                {
+                    accessor = accessor.AddModifiers(SyntaxFactory.Token(modifier));
+                }
             }
-
-            return propertyDeclaration;
+            
+            return accessor;
         }
     }
 }

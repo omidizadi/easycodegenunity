@@ -189,6 +189,16 @@ namespace easycodegenunity.Editor.Core
             System.IO.File.WriteAllText(outputPath, GeneratedCode);
         }
 
+        public void CleanUpAndSave()
+        {
+            if (System.IO.File.Exists(outputPath))
+            {
+                System.IO.File.Delete(outputPath);
+            }
+
+            Save();
+        }
+
         private SyntaxNode AddMemberToType(SyntaxNode rootNode, MemberDeclarationSyntax member)
         {
             // Find the first namespace in the compilation unit

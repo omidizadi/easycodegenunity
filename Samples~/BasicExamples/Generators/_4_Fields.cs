@@ -6,7 +6,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
     /// <summary>
     /// In this example, we demonstrate how to create a struct with fields using the EasyCodeGenerator.
     /// </summary>
-    public class _4_SampleFields : IEasyCodeGenerator
+    public class _4_Fields : IEasyCodeGenerator
     {
         public void Execute()
         {
