@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "displayName": "Easy Code Gen",
   "description": "A code generation tool for Unity",
-  "unity": "2020.3",
-  "documentationUrl": "https://github.com/omidizadi/EasyCodeGen",
-  "licensesUrl": "https://github.com/omidizadi/EasyCodeGen/blob/main/LICENSE",
+  "unity": "2021.3",
+  "documentationUrl": "https://github.com/omidizadi/easycodegenunity",
+  "licensesUrl": "https://github.com/omidizadi/easycodegenunity/blob/main/LICENSE",
   "repository": {
     "type": "git",
     "url": "https://github.com/omidizadi/easycodegenunity.git"
@@ -16,8 +16,8 @@
     "tool"
   ],
   "author": {
-    "name": "Omid Izadi",
-    "email": "your-email@example.com",
+    "name": "Omid Reza Izadi",
+    "email": "info.omidreza@gmail.com",
     "url": "https://github.com/omidizadi"
   },
   "samples": [

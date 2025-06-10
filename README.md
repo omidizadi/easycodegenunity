@@ -3,7 +3,7 @@
 # Easy Code Gen for Unity 🚀
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Unity](https://img.shields.io/badge/Unity-2020.3+-black.svg)](https://unity.com)
+[![Unity](https://img.shields.io/badge/Unity-2021.3+-black.svg)](https://unity.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![Made with C#](https://img.shields.io/badge/Made%20with-C%23-blue.svg)](https://docs.microsoft.com/en-us/dotnet/csharp/)
 
