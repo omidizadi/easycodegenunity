@@ -6,6 +6,9 @@
 [![Unity](https://img.shields.io/badge/Unity-2021.3+-black.svg)](https://unity.com)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![Made with C#](https://img.shields.io/badge/Made%20with-C%23-blue.svg)](https://docs.microsoft.com/en-us/dotnet/csharp/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue.svg)](https://www.linkedin.com/in/omidrezaizadi/)
+![GitHub Repo size](https://img.shields.io/github/repo-size/omidizadi/easycodegenunity)
+![GitHub Repo stars](https://img.shields.io/github/stars/omidizadi/easycodegenunity?style=social)
 
 A powerful code generation tool for Unity that simplifies creating boilerplate code, repetitive code structures, and streamlines your development workflow. ✨
 
