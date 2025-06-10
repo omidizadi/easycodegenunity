@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -6,13 +7,13 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
-    public abstract class EasyBasicBuilder
+    public abstract class EasyBasicBuilder<TBuilder> where TBuilder : EasyBasicBuilder<TBuilder>
     {
         protected SyntaxNode templateRoot;
 
         private string comment;
 
-        private AttributeListSyntax attributes;
+        private List<AttributeListSyntax> attributeLists = new List<AttributeListSyntax>();
 
         protected EasyBasicBuilder()
         {
@@ -23,13 +24,82 @@ namespace easycodegenunity.Editor.Core.Builders
             this.templateRoot = templateRoot;
         }
 
-        public EasyBasicBuilder WithComment(string comment)
+        public TBuilder WithSingleLineComment(string commentText)
         {
-            this.comment = comment;
-            return this;
+            comment = "// " + commentText;
+            return (TBuilder)this;
         }
 
-        public EasyBasicBuilder WithCommentFromTemplate(string memberName)
+        public TBuilder WithMultiLineComment(string commentText)
+        {
+            comment = "/* " + commentText + " */";
+            return (TBuilder)this;
+        }
+
+        public TBuilder WithSummaryComment(string commentText)
+        {
+            comment = "/// <summary>\n/// " + commentText + "\n/// </summary>";
+            return (TBuilder)this;
+        }
+
+        public TBuilder WithParamComment(string paramName, string description)
+        {
+            if (comment == null)
+            {
+                comment = "/// <param name=\"" + paramName + "\">" + description + "</param>";
+            }
+            else
+            {
+                comment += "\n/// <param name=\"" + paramName + "\">" + description + "</param>";
+            }
+
+            return (TBuilder)this;
+        }
+
+        public TBuilder WithReturnsComment(string description)
+        {
+            if (comment == null)
+            {
+                comment = "/// <returns>" + description + "</returns>";
+            }
+            else
+            {
+                comment += "\n/// <returns>" + description + "</returns>";
+            }
+
+            return (TBuilder)this;
+        }
+
+        public TBuilder ReplaceParamCommentText(string paramName, string oldValue, string newValue)
+        {
+            if (comment == null)
+            {
+                throw new InvalidOperationException("Comment is not set. Please set a comment first.");
+            }
+
+            // Find the parameter comment for this specific parameter
+            int paramStart = comment.IndexOf("<param name=\"" + paramName + "\">");
+            if (paramStart >= 0)
+            {
+                int paramEnd = comment.IndexOf("</param>", paramStart);
+                if (paramEnd >= 0)
+                {
+                    string beforeParam = comment.Substring(0, paramStart);
+                    string paramContent = comment.Substring(paramStart, paramEnd - paramStart + 8); // +8 for "</param>"
+                    string afterParam = comment.Substring(paramEnd + 8);
+
+                    // Replace text only in the specific parameter
+                    paramContent = paramContent.Replace(oldValue, newValue);
+
+                    // Reconstruct the comment
+                    comment = beforeParam + paramContent + afterParam;
+                }
+            }
+
+            return (TBuilder)this;
+        }
+
+        public TBuilder WithCommentFromTemplate(string memberName)
         {
             if (string.IsNullOrEmpty(memberName))
             {
@@ -37,25 +107,45 @@ namespace easycodegenunity.Editor.Core.Builders
             }
 
             comment = ExtractCommentFromTemplate(memberName);
-            return this;
+            return (TBuilder)this;
         }
 
-        public EasyBasicBuilder WithAttribute<T>(params object[] args) where T : Attribute
+        public TBuilder ReplaceInComment(string oldValue, string newValue)
         {
-            if (args == null || args.Length == 0)
+            if (comment == null)
             {
-                throw new ArgumentException("At least one argument must be provided for the attribute.", nameof(args));
+                throw new InvalidOperationException("Comment is not set. Please set a comment first.");
             }
 
-            var attributeName = typeof(T).Name;
-            var attributeArgumentList = SyntaxFactory.AttributeArgumentList(
-                SyntaxFactory.SeparatedList(args.Select(arg =>
-                    SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(arg.ToString()))))));
+            if (string.IsNullOrEmpty(oldValue))
+            {
+                throw new ArgumentException("Old value cannot be null or empty.", nameof(oldValue));
+            }
 
-            var attribute = SyntaxFactory.Attribute(SyntaxFactory.ParseName(attributeName), attributeArgumentList);
-            attributes = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute));
-            return this;
+            comment = comment.Replace(oldValue, newValue);
+            return (TBuilder)this;
+        }
+
+        public TBuilder WithAttribute(string attributeName, string parameters = null)
+        {
+            if (string.IsNullOrWhiteSpace(attributeName))
+            {
+                throw new ArgumentException("Attribute name cannot be null or empty.", nameof(attributeName));
+            }
+
+            var attribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(attributeName));
+
+            if (!string.IsNullOrWhiteSpace(parameters))
+            {
+                var argumentList = SyntaxFactory.ParseAttributeArgumentList(parameters);
+                attribute = attribute.WithArgumentList(argumentList);
+            }
+
+            var attributeList = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute));
+
+            attributeLists.Add(attributeList);
+
+            return (TBuilder)this;
         }
 
         public MemberDeclarationSyntax Build()
@@ -64,13 +154,21 @@ namespace easycodegenunity.Editor.Core.Builders
 
             if (comment != null)
             {
-                memberDeclaration =
-                    memberDeclaration.WithLeadingTrivia(SyntaxFactory.TriviaList(SyntaxFactory.Comment(comment)));
+                var triviaList = new List<SyntaxTrivia>();
+
+                string[] commentLines = comment.Split('\n');
+                foreach (var line in commentLines)
+                {
+                    triviaList.Add(SyntaxFactory.Comment(line));
+                    triviaList.Add(SyntaxFactory.CarriageReturnLineFeed);
+                }
+
+                memberDeclaration = memberDeclaration.WithLeadingTrivia(SyntaxFactory.TriviaList(triviaList));
             }
 
-            if (attributes != null)
+            if (attributeLists is { Count: > 0 })
             {
-                memberDeclaration = memberDeclaration.WithAttributeLists(SyntaxFactory.SingletonList(attributes));
+                memberDeclaration = memberDeclaration.WithAttributeLists(SyntaxFactory.List(attributeLists));
             }
 
             return memberDeclaration;

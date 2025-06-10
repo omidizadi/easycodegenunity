@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
-    public abstract class EasyTypeBuilder : EasyBasicBuilder
+    public abstract class EasyTypeBuilder : EasyBasicBuilder<EasyTypeBuilder>
     {
         private string baseType;
         private string[] interfaces;
@@ -14,6 +15,10 @@ namespace easycodegenunity.Editor.Core.Builders
         private (string, string)[] constructorParameters;
         private EasyConstructorBuilder constructorBuilder;
         protected string name { get; set; }
+
+        protected EasyTypeBuilder(SyntaxNode templateRoot = null) : base(templateRoot)
+        {
+        }
 
         public EasyTypeBuilder WithName(string name)
         {

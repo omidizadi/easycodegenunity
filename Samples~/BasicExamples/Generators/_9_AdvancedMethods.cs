@@ -3,6 +3,9 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
 {
+    /// <summary>
+    /// In this example, we demonstrate how to create various types of methods in a class using the EasyCodeGenerator.
+    /// </summary>
     public class _9_AdvancedMethods : IEasyCodeGenerator
     {
         public void Execute()

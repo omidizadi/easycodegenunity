@@ -69,7 +69,7 @@ namespace easycodegenunity.Editor.Core
 
         public EasyCodeBuilder AddClass(Func<EasyClassBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
         {
-            var classBuilder = new EasyClassBuilder();
+            var classBuilder = new EasyClassBuilder(templateRoot);
             var typeDeclaration = typeBuilderInstructions(classBuilder);
             root = AddMemberToType(root, typeDeclaration);
             return this;
@@ -77,7 +77,7 @@ namespace easycodegenunity.Editor.Core
 
         public EasyCodeBuilder AddStruct(Func<EasyTypeBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
         {
-            var structBuilder = new EasyStructBuilder();
+            var structBuilder = new EasyStructBuilder(templateRoot);
             var typeDeclaration = typeBuilderInstructions(structBuilder);
             root = AddMemberToType(root, typeDeclaration);
             return this;
@@ -85,7 +85,7 @@ namespace easycodegenunity.Editor.Core
 
         public EasyCodeBuilder AddConstructor(Func<EasyConstructorBuilder, MemberDeclarationSyntax> typeBuilderInstructions)
         {
-            var constructorBuilder = new EasyConstructorBuilder();
+            var constructorBuilder = new EasyConstructorBuilder(templateRoot);
             var constructorDeclaration = typeBuilderInstructions(constructorBuilder);
             root = AddMemberToType(root, constructorDeclaration);
             return this;

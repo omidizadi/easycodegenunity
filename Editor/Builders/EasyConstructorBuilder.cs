@@ -6,12 +6,14 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
-    public class EasyConstructorBuilder : EasyBasicBuilder
+    public class EasyConstructorBuilder : EasyBasicBuilder<EasyConstructorBuilder>
     {
         private string className;
         private (string, string)[] parameters;
         private SyntaxKind[] modifiers;
         private string[] statements;
+        private bool useExpressionBody = false;
+        private string expressionBody;
 
         public EasyConstructorBuilder(SyntaxNode templateRoot = null) : base(templateRoot)
         {
@@ -37,6 +39,40 @@ namespace easycodegenunity.Editor.Core.Builders
             }
 
             this.statements = statements;
+            this.useExpressionBody = false;
+            return this;
+        }
+
+        public EasyConstructorBuilder WithExpressionBody(string expression)
+        {
+            if (string.IsNullOrWhiteSpace(expression))
+            {
+                throw new ArgumentException("Expression cannot be null or empty.", nameof(expression));
+            }
+
+            // Ensure we don't accidentally include a return statement in expression-bodied members
+            string cleanExpression = expression.Replace("return ", "").Replace(";", "").Trim();
+            this.expressionBody = cleanExpression;
+            this.useExpressionBody = true;
+            this.statements = null;
+            return this;
+        }
+
+        public EasyConstructorBuilder WithParameter(string type, string name)
+        {
+            if (string.IsNullOrWhiteSpace(type) || string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Parameter type and name cannot be null or empty.");
+            }
+
+            parameters ??= Array.Empty<(string, string)>();
+
+            if (parameters.Any(p => p.Item2 == name))
+            {
+                throw new InvalidOperationException($"Parameter '{name}' already exists.");
+            }
+
+            parameters = parameters.Append((type, name)).ToArray();
             return this;
         }
 
@@ -76,18 +112,34 @@ namespace easycodegenunity.Editor.Core.Builders
                 .OfType<ConstructorDeclarationSyntax>()
                 .FirstOrDefault(c => c.Identifier.Text == targetClassName);
 
-            if (constructor?.Body == null)
+            if (constructor == null)
             {
                 throw new InvalidOperationException($"Constructor for type '{targetClassName}' not found in the template.");
             }
 
-            statements = constructor.Body.Statements
-                .Select(stmt => stmt.ToFullString())
-                .Where(stmt => !string.IsNullOrWhiteSpace(stmt))
-                .ToArray();
-
             parameters = constructor.ParameterList.Parameters
                 .Select(p => (p.Type?.ToString(), p.Identifier.Text)).ToArray();
+
+            if (constructor.ExpressionBody != null)
+            {
+                // Handle expression-bodied constructors
+                expressionBody = constructor.ExpressionBody.Expression.ToString();
+                useExpressionBody = true;
+                statements = null;
+            }
+            else if (constructor.Body != null)
+            {
+                // Handle normal block-bodied constructors
+                statements = constructor.Body.Statements
+                    .Select(stmt => stmt.ToFullString())
+                    .Where(stmt => !string.IsNullOrWhiteSpace(stmt))
+                    .ToArray();
+                useExpressionBody = false;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Constructor for type '{targetClassName}' has no body or expression body.");
+            }
 
             return this;
         }
@@ -104,12 +156,25 @@ namespace easycodegenunity.Editor.Core.Builders
                 throw new ArgumentNullException(nameof(replaceText), "Replace text cannot be null.");
             }
 
-            if (statements == null)
+            if (useExpressionBody)
             {
-                throw new InvalidOperationException("Constructor body is not set. Please set a body first.");
+                if (expressionBody == null)
+                {
+                    throw new InvalidOperationException("Constructor expression body is not set.");
+                }
+
+                expressionBody = expressionBody.Replace(searchText, replaceText);
+            }
+            else
+            {
+                if (statements == null)
+                {
+                    throw new InvalidOperationException("Constructor body is not set. Please set a body first.");
+                }
+
+                statements = statements.Select(stmt => stmt.Replace(searchText, replaceText)).ToArray();
             }
 
-            statements = statements.Select(stmt => stmt.Replace(searchText, replaceText)).ToArray();
             return this;
         }
 
@@ -121,26 +186,14 @@ namespace easycodegenunity.Editor.Core.Builders
                     "Class name is not set. Please set a class name first.");
             }
 
-            if (statements == null || statements.Length == 0)
-            {
-                throw new InvalidOperationException(
-                    "Constructor body is not set. Please set a body first.");
-            }
-
             var parameterList = SyntaxFactory.ParameterList(
                 SyntaxFactory.SeparatedList(parameters?.Select(p =>
                     SyntaxFactory.Parameter(SyntaxFactory.Identifier(p.Item2))
                         .WithType(SyntaxFactory.ParseTypeName(p.Item1))) ?? Array.Empty<ParameterSyntax>()));
 
-            var syntaxStatements = statements
-                .Where(stmt => !string.IsNullOrWhiteSpace(stmt))
-                .Select(stmt => SyntaxFactory.ParseStatement(stmt.Trim()))
-                .ToArray();
-
             ConstructorDeclarationSyntax constructorDeclaration =
                 SyntaxFactory.ConstructorDeclaration(className)
-                    .WithParameterList(parameterList)
-                    .WithBody(SyntaxFactory.Block(syntaxStatements));
+                    .WithParameterList(parameterList);
 
             if (modifiers != null)
             {
@@ -148,6 +201,34 @@ namespace easycodegenunity.Editor.Core.Builders
                 {
                     constructorDeclaration = constructorDeclaration.AddModifiers(SyntaxFactory.Token(modifier));
                 }
+            }
+
+            if (useExpressionBody)
+            {
+                if (string.IsNullOrWhiteSpace(expressionBody))
+                {
+                    throw new InvalidOperationException(
+                        "Constructor expression body is not set. Please set an expression body first.");
+                }
+
+                constructorDeclaration = constructorDeclaration
+                    .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(SyntaxFactory.ParseExpression(expressionBody)))
+                    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+            }
+            else
+            {
+                if (statements == null || statements.Length == 0)
+                {
+                    throw new InvalidOperationException(
+                        "Constructor body is not set. Please set a body first.");
+                }
+
+                var syntaxStatements = statements
+                    .Where(stmt => !string.IsNullOrWhiteSpace(stmt))
+                    .Select(stmt => SyntaxFactory.ParseStatement(stmt.Trim()))
+                    .ToArray();
+
+                constructorDeclaration = constructorDeclaration.WithBody(SyntaxFactory.Block(syntaxStatements));
             }
 
             return constructorDeclaration;

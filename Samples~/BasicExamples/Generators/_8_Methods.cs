@@ -4,6 +4,9 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
 {
+    /// <summary>
+    /// A simple example of generating a class with a method using EasyCodeGenUnity.
+    /// </summary>
     public class _8_Methods : IEasyCodeGenerator
     {
         public void Execute()

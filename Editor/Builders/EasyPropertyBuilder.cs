@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
-    public class EasyPropertyBuilder : EasyBasicBuilder
+    public class EasyPropertyBuilder : EasyBasicBuilder<EasyPropertyBuilder>
     {
         private string name;
         private string type;

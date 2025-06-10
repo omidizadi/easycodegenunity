@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace easycodegenunity.Editor.Core.Builders
 {
-    public class EasyFieldBuilder : EasyBasicBuilder
+    public class EasyFieldBuilder : EasyBasicBuilder<EasyFieldBuilder>
     {
         private string name;
         private string type;

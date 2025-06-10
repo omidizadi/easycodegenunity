@@ -3,6 +3,9 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
 {
+    /// <summary>
+    /// Some advanced property examples demonstrating various property types and behaviors.
+    /// </summary>
     public class _7_AdvancedProperty : IEasyCodeGenerator
     {
         public void Execute()
