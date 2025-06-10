@@ -11,7 +11,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
         public void Execute()
         {
             new EasyCodeBuilder()
-                .AddNamespace("easycodegenunity.Editor.Samples.BasicExamples.Generated")
+                .AddNamespace(BasicExampleHelper.GetNamespace) // Defining the namespace for the generated code
                 .AddUsingStatement("System")
                 .AddUsingStatement("System.Collections.Generic")
                 .AddClass(typeBuilder => typeBuilder
@@ -116,7 +116,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                         return result;")
                     .Build())
                 
-                .SetDirectory("Assets/Samples/BasicExamples/Generated")
+                .SetDirectory(BasicExampleHelper.GetDirectory) // Setting the directory where the generated file will be saved
                 .SetFileName("AdvancedMethodsSample.cs")
                 .Generate()
                 .CleanUpAndSave();

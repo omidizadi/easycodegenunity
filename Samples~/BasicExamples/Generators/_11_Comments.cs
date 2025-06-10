@@ -16,7 +16,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
             new EasyCodeBuilder()
                 .AddUsingStatement("System")
                 .AddUsingStatement("System.Collections.Generic")
-                .AddNamespace("easycodegenunity.Editor.Samples.BasicExamples.Generated")
+                .AddNamespace(BasicExampleHelper.GetNamespace) // Defining the namespace for the generated code
 
                 // Add class with XML documentation comment
                 .AddClass(classBuilder => classBuilder
@@ -96,7 +96,7 @@ Last generated: " + System.DateTime.Now.ToString("yyyy-MM-dd"))
                     .ReplaceParamCommentText("items", "{ITEM_TYPE}", "strings")
                     .WithBodyLine("// Implementation goes here")
                     .Build())
-                .SetDirectory("Assets/Samples/BasicExamples/Generated")
+                .SetDirectory(BasicExampleHelper.GetDirectory) // Setting the directory where the generated file will be saved
                 .SetFileName("CommentedClass.cs")
                 .Generate()
                 .Save();

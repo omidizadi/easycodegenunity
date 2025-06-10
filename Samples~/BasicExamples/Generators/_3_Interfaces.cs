@@ -13,7 +13,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
             // generate a class that inherits from MonoBehaviour and implements SampleInterface
             new EasyCodeBuilder()
                 .AddUsingStatement("UnityEngine") // For MonoBehaviour
-                .AddNamespace("easycodegenunity.Editor.Samples.BasicExamples.Generated") // Namespace for the generated class
+                .AddNamespace(BasicExampleHelper.GetNamespace) // Defining the namespace for the generated code
                 .AddClass(typeBuilder => typeBuilder
                     .WithName("SampleClass") // Name of the class
                     .WithModifiers(SyntaxKind.PublicKeyword) // Making the class public
@@ -32,7 +32,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithBody(@"Debug.Log(""DoSomethingB!"");")
                     .WithModifiers(SyntaxKind.PublicKeyword)
                     .Build())
-                .SetDirectory("Assets/Samples/BasicExamples/Generated")
+                .SetDirectory(BasicExampleHelper.GetDirectory) // Setting the directory where the generated file will be saved
                 .SetFileName("SampleInterfaces.cs")
                 .Generate()
                 .Save();

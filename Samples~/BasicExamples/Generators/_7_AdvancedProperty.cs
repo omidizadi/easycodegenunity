@@ -11,7 +11,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
         public void Execute()
         {
             new EasyCodeBuilder()
-                .AddNamespace("easycodegenunity.Editor.Samples.BasicExamples.Generated")
+                .AddNamespace(BasicExampleHelper.GetNamespace) // Defining the namespace for the generated code
                 .AddClass(typeBuilder => typeBuilder
                     .WithName("AdvancedPropertyDemo")
                     .WithModifiers(SyntaxKind.PublicKeyword)
@@ -102,7 +102,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     )
                     .Build())
                 
-                .SetDirectory("Assets/Samples/BasicExamples/Generated")
+                .SetDirectory(BasicExampleHelper.GetDirectory) // Setting the directory where the generated file will be saved
                 .SetFileName("AdvancedPropertySample.cs")
                 .Generate()
                 .Save();

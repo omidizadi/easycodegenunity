@@ -13,7 +13,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
         {
             new EasyCodeBuilder()
                 .AddUsingStatement("System")
-                .AddNamespace("easycodegenunity.Editor.Samples.BasicExamples.Generated")
+                .AddNamespace(BasicExampleHelper.GetNamespace) // Defining the namespace for the generated code
                 .AddClass(typeBuilder => typeBuilder
                     .WithName("SampleClassWithMethod")
                     .WithModifiers(SyntaxKind.PublicKeyword)
@@ -24,7 +24,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithModifiers(SyntaxKind.PublicKeyword)
                     .WithBody("Console.WriteLine(\"This is a sample method\");")
                     .Build())
-                .SetDirectory("Assets/Samples/BasicExamples/Generated")
+                .SetDirectory(BasicExampleHelper.GetDirectory) // Setting the directory where the generated file will be saved
                 .SetFileName("SampleMethod.cs")
                 .Generate()
                 .Save();

@@ -12,7 +12,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
         {
             new EasyCodeBuilder()
                 .AddUsingStatement("System") // For Console.WriteLine
-                .AddNamespace("easycodegenunity.Editor.Samples.BasicExamples.Generated") // Namespace for the generated class
+                .AddNamespace(BasicExampleHelper.GetNamespace) // Defining the namespace for the generated code
                 .AddClass(typeBuilder => typeBuilder
                     .WithName("UtilityClass") // Name of the static class
                     .WithModifiers(SyntaxKind.PublicKeyword, SyntaxKind.StaticKeyword) // Making the class public and static
@@ -23,7 +23,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithBody("Console.WriteLine(\"Hello from UtilityClass!\");")
                     .WithModifiers(SyntaxKind.PublicKeyword, SyntaxKind.StaticKeyword)
                     .Build())
-                .SetDirectory("Assets/Samples/BasicExamples/Generated")
+                .SetDirectory(BasicExampleHelper.GetDirectory) // Setting the directory where the generated file will be saved
                 .SetFileName("UtilityClass.cs")
                 .Generate()
                 .Save();

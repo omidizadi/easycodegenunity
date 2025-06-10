@@ -11,7 +11,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
         public void Execute()
         {
             new EasyCodeBuilder()
-                .AddNamespace("easycodegenunity.Editor.Samples.BasicExamples.Generated")
+                .AddNamespace(BasicExampleHelper.GetNamespace) // Defining the namespace for the generated code
                 .AddStruct(structBuilder => structBuilder // Define a struct named SampleFields
                     .WithName("SampleFields")
                     .WithModifiers(SyntaxKind.PublicKeyword)
@@ -32,7 +32,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithType("string[]")
                     .WithModifiers(SyntaxKind.PrivateKeyword)
                     .Build())
-                .SetDirectory("Assets/Samples/BasicExamples/Generated")
+                .SetDirectory(BasicExampleHelper.GetDirectory) // Setting the directory where the generated file will be saved
                 .SetFileName("SampleFields.cs")
                 .Generate()
                 .Save();

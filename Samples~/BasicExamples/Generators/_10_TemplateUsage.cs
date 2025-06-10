@@ -15,7 +15,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
             new EasyCodeBuilder()
                 .WithTemplate<BasicTemplate>() // Set the template for this generator
                 .AddUsingStatement("System")
-                .AddNamespace("easycodegenunity.Editor.Samples.BasicExamples.Generated")
+                .AddNamespace(BasicExampleHelper.GetNamespace) // Defining the namespace for the generated code
                 .AddClass(typeBuilder => typeBuilder
                     .WithName("PersonFromTemplate")
                     .WithModifiers(SyntaxKind.PublicKeyword)
@@ -81,7 +81,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithBodyFromTemplate(nameof(BasicTemplate.GetGreeting)) // Use method body from template
                     .ReplaceInBody("_NAME_PLACEHOLDER_", "name") // Replace placeholder with our field name
                     .Build())
-                .SetDirectory("Assets/Samples/BasicExamples/Generated")
+                .SetDirectory(BasicExampleHelper.GetDirectory) // Setting the directory where the generated file will be saved
                 .SetFileName("PersonFromTemplate.cs")
                 .Generate()
                 .Save();

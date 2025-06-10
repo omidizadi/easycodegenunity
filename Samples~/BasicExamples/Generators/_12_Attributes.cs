@@ -16,7 +16,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                 .AddUsingStatement("System")
                 .AddUsingStatement("UnityEngine")
                 .AddUsingStatement("System.Diagnostics")
-                .AddNamespace("easycodegenunity.Editor.Samples.BasicExamples.Generated")
+                .AddNamespace(BasicExampleHelper.GetNamespace) // Defining the namespace for the generated code
 
                 // Add class with multiple attributes
                 .AddClass(classBuilder => classBuilder
@@ -69,7 +69,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                         "Console.WriteLine(\"Initialized\");"
                     )
                     .Build())
-                .SetDirectory("Assets/Samples/BasicExamples/Generated")
+                .SetDirectory(BasicExampleHelper.GetDirectory) // Setting the directory where the generated file will be saved
                 .SetFileName("AttributeExampleClass.cs")
                 .Generate()
                 .Save();
