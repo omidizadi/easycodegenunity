@@ -166,6 +166,14 @@ foreach (var queryResult in EasyQuery.WithAttribute<GameData>())
 }
 ```
 
+## 🚀 How to Run Generators?
+
+To run code generators, use the EasyCodeGen Editor Window:
+
+1.  Open the window via `Window` > `EasyCodeGen`.
+2.  Select the generators you want to run.
+3.  Click the "Generate Code" button.
+
 ## 🌟 Where Code Generation Shines
 
 ### Game Systems Scaling 📈
