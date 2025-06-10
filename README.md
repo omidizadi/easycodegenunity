@@ -47,7 +47,10 @@ Game development often involves writing repetitive code patterns across many fil
 1. Open the Unity Package Manager window (Window > Package Manager)
 2. Click the "+" button in the top-left corner
 3. Select "Add package from git URL..."
-4. Enter: `https://github.com/omidizadi/easycodegenunity.git`
+4. Enter: 
+```text
+https://github.com/omidizadi/easycodegenunity.git
+```
 5. Click "Add"
 
 ### Option 2: Installation via local folder
