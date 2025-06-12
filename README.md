@@ -249,7 +249,7 @@ You can find detailed documentation on how to use Easy Code Gen here: [Wiki](htt
 - [ ] Add more query options for existing code
 - [ ] Enhance performance for large codebases
 - [ ] Support for more complex code generation scenarios
-- [ ] Improve documentation and examples
+- [X] Improve documentation and examples
 - [ ] Add more unit tests for code generation logic
 
 ## 👥 Contributing
