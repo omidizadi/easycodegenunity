@@ -157,7 +157,7 @@ namespace easycodegenunity.Editor.Core
         /// </summary>
         /// <typeparam name="T">The type to create an EasyQueryResult for.</typeparam>
         /// <returns>An EasyQueryCollection containing the EasyQueryResult for the specified type.</returns>
-        public static EasyQueryCollection WithType<T>()
+        public static EasyQueryResult WithType<T>()
         {
             var type = typeof(T);
             var result = new EasyQueryResult
@@ -168,7 +168,7 @@ namespace easycodegenunity.Editor.Core
                 Namespace = type.Namespace
             };
 
-            return new EasyQueryCollection(new List<EasyQueryResult> { result });
+            return result;
         }
 
         /// <summary>
@@ -177,10 +177,10 @@ namespace easycodegenunity.Editor.Core
         /// <param name="resultClass">The EasyQueryResult representing the type to search.</param>
         /// <typeparam name="T">The type of the attribute to search for.</typeparam>
         /// <returns>A list of EasyQueryResult objects representing the members found.</returns>
-        public static List<EasyQueryResult> WithMembers<T>(this EasyQueryResult resultClass)
+        public static EasyQueryCollection WithMembersWithAttribute<T>(this EasyQueryResult resultClass)
         {
-            return (from member in resultClass.Type.GetMembers(BindingFlags.Instance | BindingFlags.Public |
-                                                               BindingFlags.NonPublic)
+            var query = (from member in resultClass.Type.GetMembers(BindingFlags.Instance | BindingFlags.Public |
+                                                                    BindingFlags.NonPublic)
                 where Attribute.IsDefined(member, typeof(T))
                 select new EasyQueryResult
                 {
@@ -195,7 +195,36 @@ namespace easycodegenunity.Editor.Core
                         _ => null
                     },
                     Namespace = member.DeclaringType?.Namespace,
-                }).ToList();
+                });
+
+            return new EasyQueryCollection(query.ToList());
+        }
+
+        /// <summary>
+        /// Finds all members of a type, including properties, fields, methods, and events.
+        /// </summary>
+        /// <param name="resultClass">The EasyQueryResult representing the type to search.</param>
+        /// <returns>A list of EasyQueryResult objects representing all members found.</returns>
+        public static EasyQueryCollection WithAllMembers(this EasyQueryResult resultClass)
+        {
+            var query = (from member in resultClass.Type.GetMembers(BindingFlags.Instance | BindingFlags.Public |
+                                                                    BindingFlags.NonPublic)
+                select new EasyQueryResult
+                {
+                    Name = member.Name,
+                    FullName = member.MemberType + "." + member.Name,
+                    Type = member switch
+                    {
+                        PropertyInfo prop => prop.PropertyType,
+                        FieldInfo field => field.FieldType,
+                        MethodInfo method => method.ReturnType,
+                        EventInfo eventInfo => eventInfo.EventHandlerType,
+                        _ => null
+                    },
+                    Namespace = member.DeclaringType?.Namespace,
+                });
+
+            return new EasyQueryCollection(query.ToList());
         }
 
         /// <summary>

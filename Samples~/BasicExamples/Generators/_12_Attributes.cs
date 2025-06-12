@@ -64,7 +64,7 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithAttribute("Conditional", "(\"DEBUG\")")
                     // Add obsolete attribute with message
                     .WithAttribute("Obsolete", "(\"Use InitializeAsync instead\", true)")
-                    .WithBodyLines(
+                    .WithBody(
                         "_initialized = true;",
                         "Console.WriteLine(\"Initialized\");"
                     )

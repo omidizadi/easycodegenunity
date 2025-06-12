@@ -23,7 +23,7 @@ namespace easycodegenunity.Editor.Samples.GameDataExample
                         .WithModifiers(SyntaxKind.PublicKeyword, SyntaxKind.PartialKeyword)
                         .Build());
 
-                var members = queryResult.WithMembers<GameDataField>();
+                var members = queryResult.WithMembersWithAttribute<GameDataField>();
 
                 foreach (var memberQueryResult in members)
                 {

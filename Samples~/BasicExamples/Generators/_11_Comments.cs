@@ -94,7 +94,7 @@ Last generated: " + System.DateTime.Now.ToString("yyyy-MM-dd"))
                     .ReplaceInComment("{DATA_TYPE}", "string")
                     .WithParamComment("items", "The collection of {ITEM_TYPE} to process")
                     .ReplaceParamCommentText("items", "{ITEM_TYPE}", "strings")
-                    .WithBodyLine("// Implementation goes here")
+                    .WithBody("// Implementation goes here")
                     .Build())
                 .SetDirectory(BasicExampleHelper.GetDirectory) // Setting the directory where the generated file will be saved
                 .SetFileName("CommentedClass.cs")
