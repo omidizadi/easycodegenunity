@@ -240,7 +240,7 @@ This package includes optional samples demonstrating how to use Easy Code Gen:
 
 ## 📖 Documentation
 
-(Coming soon!) For now, refer to the samples!
+You can find detailed documentation on how to use Easy Code Gen here: [Wiki](https://github.com/omidizadi/easycodegenunity/wiki)
 
 ## 🗺️ Roadmap
 
