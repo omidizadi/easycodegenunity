@@ -192,17 +192,6 @@ namespace easycodegenunity.Editor.Core.Builders
         }
 
         /// <summary>
-        /// Sets the property to be an auto property.
-        /// </summary>
-        /// <returns>The EasyPropertyBuilder instance for chaining.</returns>
-        public EasyPropertyBuilder WithAutoProperty()
-        {
-            getterStatements = null;
-            setterStatements = null;
-            return this;
-        }
-
-        /// <summary>
         /// Sets the getter from template.
         /// </summary>
         /// <param name="propertyNameInTemplate">The property name in template.</param>

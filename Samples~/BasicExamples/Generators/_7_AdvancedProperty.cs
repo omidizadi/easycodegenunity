@@ -22,7 +22,6 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithName("SimpleProperty")
                     .WithType("int")
                     .WithModifiers(SyntaxKind.PublicKeyword)
-                    .WithAutoProperty()
                     .Build())
                 
                 // Example 2: Property with a private setter
@@ -31,7 +30,6 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithType("string")
                     .WithModifiers(SyntaxKind.PublicKeyword)
                     .WithSetterModifiers(SyntaxKind.PrivateKeyword)
-                    .WithAutoProperty()
                     .Build())
                 
                 // Example 3: Property with a backing field
@@ -68,10 +66,10 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithModifiers(SyntaxKind.PublicKeyword)
                     .WithoutSetter()
                     .WithGetterBody(
-                        @"if (SimpleProperty < 0)",
-                        @"    return false;",
-                        @"if (string.IsNullOrEmpty(ReadMostlyProperty))",
-                        @"    return false;",
+                        @"if (SimpleProperty < 0)
+                            return false;",
+                        @"if (string.IsNullOrEmpty(ReadMostlyProperty))
+                            return false;",
                         @"return true;"
                     )
                     .Build())
@@ -88,16 +86,17 @@ namespace easycodegenunity.Editor.Samples.BasicExamples.Generators
                     .WithModifiers(SyntaxKind.PublicKeyword)
                     .WithExpressionBodiedGetter("_validatedValue")
                     .WithSetterBody(
-                        @"if (value < 0)",
-                        @"{",
-                        @"    _validatedValue = 0;",
-                        @"    return;",
-                        @"}",
-                        @"if (value > 100)",
-                        @"{",
-                        @"    _validatedValue = 100;",
-                        @"    return;",
-                        @"}",
+                        @"if (value < 0)
+                          {
+                              _validatedValue = 0;
+                              return;
+                          }",
+                                                  @"
+                          if (value > 100)
+                          {
+                              _validatedValue = 100;
+                              return;
+                          }",
                         @"_validatedValue = value;"
                     )
                     .Build())

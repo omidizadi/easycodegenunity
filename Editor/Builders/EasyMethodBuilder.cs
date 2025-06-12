@@ -78,45 +78,6 @@ namespace easycodegenunity.Editor.Core.Builders
         }
 
         /// <summary>
-        /// Adds a line to the method body.
-        /// </summary>
-        /// <param name="statement">The statement to add.</param>
-        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
-        public EasyMethodBuilder WithBodyLine(string statement)
-        {
-            if (string.IsNullOrWhiteSpace(statement))
-            {
-                throw new ArgumentException("Statement cannot be null or empty.", nameof(statement));
-            }
-
-            if (statements == null)
-            {
-                statements = new[] { statement };
-            }
-            else
-            {
-                var newStatements = new string[statements.Length + 1];
-                Array.Copy(statements, newStatements, statements.Length);
-                newStatements[statements.Length] = statement;
-                statements = newStatements;
-            }
-
-            this.useExpressionBody = false;
-            this.expressionBody = null;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the body of the method.
-        /// </summary>
-        /// <param name="bodyStatements">The body statements of the method.</param>
-        /// <returns>The EasyMethodBuilder instance for chaining.</returns>
-        public EasyMethodBuilder WithBodyLines(params string[] bodyStatements)
-        {
-            return WithBody(bodyStatements);
-        }
-
-        /// <summary>
         /// Sets the expression body of the method.
         /// </summary>
         /// <param name="expression">The expression body of the method.</param>

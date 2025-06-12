@@ -10,7 +10,8 @@
 ![GitHub Repo size](https://img.shields.io/github/repo-size/omidizadi/easycodegenunity)
 ![GitHub Repo stars](https://img.shields.io/github/stars/omidizadi/easycodegenunity?style=social)
 
-A powerful code generation tool for Unity that simplifies creating boilerplate code, repetitive code structures, and streamlines your development workflow. ✨
+A powerful code generation tool for Unity that simplifies creating boilerplate code, repetitive code structures, and
+streamlines your development workflow. ✨
 
 ## 📋 Table of Contents
 
@@ -26,7 +27,8 @@ A powerful code generation tool for Unity that simplifies creating boilerplate c
 
 ## ✨ Why Easy Code Gen?
 
-Game development often involves writing repetitive code patterns across many files. As your project scales, maintaining consistency becomes challenging. Easy Code Gen solves this by:
+Game development often involves writing repetitive code patterns across many files. As your project scales, maintaining
+consistency becomes challenging. Easy Code Gen solves this by:
 
 - **Eliminating Boilerplate**: Generate repeatable code structures with minimal effort
 - **Ensuring Consistency**: Maintain uniform code patterns across your entire codebase
@@ -50,10 +52,12 @@ Game development often involves writing repetitive code patterns across many fil
 1. Open the Unity Package Manager window (Window > Package Manager)
 2. Click the "+" button in the top-left corner
 3. Select "Add package from git URL..."
-4. Enter: 
+4. Enter:
+
 ```text
 https://github.com/omidizadi/easycodegenunity.git
 ```
+
 5. Click "Add"
 
 ### Option 2: Installation via local folder
@@ -90,6 +94,22 @@ new EasyCodeBuilder()
     .SetFileName("HelloWorldBehavior.cs")
     .Generate()
     .Save();
+```
+
+The result:
+
+```csharp
+using UnityEngine;
+namespace MyGame.Generated
+{
+    public class HelloWorldBehavior : MonoBehaviour
+    {
+        private void Start()
+        {
+            Debug.Log("Hello, World!");
+        }
+    }
+}
 ```
 
 ### Example 2: Template-Based Code Generation 📝
@@ -170,9 +190,9 @@ foreach (var queryResult in EasyQuery.WithAttribute<GameData>())
 
 To run code generators, use the EasyCodeGen Editor Window:
 
-1.  Open the window via `Window` > `EasyCodeGen`.
-2.  Select the generators you want to run.
-3.  Click the "Generate Code" button.
+1. Open the window via `Window` > `EasyCodeGen`.
+2. Select the generators you want to run.
+3. Click the "Generate Code" button.
 
 <img width="507" alt="EasyCodeGen Window" src="https://github.com/user-attachments/assets/81b277d3-f47b-449c-8682-6ae23cf4fa48" />
 
@@ -192,15 +212,20 @@ As your game grows, you'll likely need similar patterns across many systems:
 
 EasyCodeGen provides several advantages over traditional code generation approaches:
 
-- 🔍 **Smart Code Querying**: Easily query your codebase to find types or members with specific attributes, interfaces, or base classes to generate code for
-  
-- 🌊 **Fluent and Intuitive API**: Clear, chainable methods make code generation readable and maintainable - what you see is what you get
+- 🔍 **Smart Code Querying**: Easily query your codebase to find types or members with specific attributes, interfaces,
+  or base classes to generate code for
 
-- 🏗️ **Compiled Class Templates**: Uses actual C# classes as templates instead of brittle string-based templates, giving you compile-time safety
+- 🌊 **Fluent and Intuitive API**: Clear, chainable methods make code generation readable and maintainable - what you see
+  is what you get
 
-- 🧩 **Roslyn-Powered Generation**: Built on the .NET Compiler Platform for robust code generation with full language understanding
+- 🏗️ **Compiled Class Templates**: Uses actual C# classes as templates instead of brittle string-based templates, giving
+  you compile-time safety
 
-- 🔄 **Low Template Maintenance**: No string templates means no escaping issues, no syntax errors in templates, and full IDE support
+- 🧩 **Roslyn-Powered Generation**: Built on the .NET Compiler Platform for robust code generation with full language
+  understanding
+
+- 🔄 **Low Template Maintenance**: No string templates means no escaping issues, no syntax errors in templates, and full
+  IDE support
 
 - 🧪 **Testable Generation Logic**: Unit test your generators just like any other code in your project
 
@@ -229,7 +254,8 @@ This package includes optional samples demonstrating how to use Easy Code Gen:
 
 ## 👥 Contributing
 
-We welcome contributions to Easy Code Gen! Whether it's bug reports, feature requests, or code contributions, please feel free to make a pull request or open an issue.
+We welcome contributions to Easy Code Gen! Whether it's bug reports, feature requests, or code contributions, please
+feel free to make a pull request or open an issue.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -243,4 +269,5 @@ This package is licensed under the terms found in the LICENSE file.
 
 ## 🏷️ Tags
 
-`unity` `game-development` `code-generation` `tooling` `boilerplate` `productivity` `editor-tools` `c-sharp` `template-engine` `code-analysis` `ast` `roslyn`
+`unity` `game-development` `code-generation` `tooling` `boilerplate` `productivity` `editor-tools` `c-sharp`
+`template-engine` `code-analysis` `ast` `roslyn`
